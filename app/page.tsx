@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En curso";
@@ -37,7 +37,7 @@ const sections: { name: Section; icon: string }[] = [
 
 function Icon({ name, size = 18 }: { name: string; size?: number }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true as const };
-  const paths: Record<string, React.ReactNode> = {
+  const paths: Record<string, ReactNode> = {
     grid: <><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></>,
     flow: <><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v5a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v-1"/><path d="M6 12h.01"/></>,
     cloud: <><path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 8.5c0 .17.01.34.03.5A4.5 4.5 0 0 0 7 18Z"/><path d="m9 14 3 3 3-3M12 17v-6"/></>,
@@ -76,12 +76,19 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState<"Todos" | Status>("Todos");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080");
+
+  useEffect(() => {
+    const savedUrl = window.localStorage.getItem("cdci.apiBaseUrl");
+    if (savedUrl) setApiUrl(savedUrl);
+  }, []);
 
   const filteredPipelines = useMemo(() => pipelines.filter((pipeline) => {
     const matchesStatus = statusFilter === "Todos" || pipeline.status === statusFilter;
     const haystack = `${pipeline.name} ${pipeline.repository} ${pipeline.branch} ${pipeline.commit}`.toLowerCase();
     return matchesStatus && haystack.includes(query.toLowerCase());
   }), [statusFilter, query]);
+  const todayLabel = useMemo(() => new Intl.DateTimeFormat("es-BO", { timeZone: "America/La_Paz", weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()).replace(",", "").toUpperCase(), []);
 
   function showNotice(message: string) {
     setNotice(message);
@@ -100,7 +107,7 @@ export default function Home() {
     <aside className="sidebar">
       <a className="brand" href="#inicio" onClick={(event) => { event.preventDefault(); setSection("Resumen"); }}>
         <span className="brand-symbol"><i /><i /><i /></span>
-        <span className="brand-name">nexo<span>.</span></span>
+        <span className="brand-name">cdci<span>.</span></span>
         <span className="brand-tag">CI/CD</span>
       </a>
       <div className="workspace-switcher">
@@ -137,7 +144,7 @@ export default function Home() {
 
       <div className="content-wrap">
         <div className="page-heading">
-          <div><div className="eyebrow">JUEVES, 9 DE OCTUBRE DE 2026 <span className="live-dot" /></div><h1>{section === "Resumen" ? "Hola, equipo" : pageTitles[section].title}<span className="wave">{section === "Resumen" ? "✳" : ""}</span></h1><p>{pageTitles[section].subtitle}</p></div>
+          <div><div className="eyebrow">{todayLabel} <span className="live-dot" /></div><h1>{section === "Resumen" ? "Hola, equipo" : pageTitles[section].title}<span className="wave">{section === "Resumen" ? "✳" : ""}</span></h1><p>{pageTitles[section].subtitle}</p></div>
           <div className="heading-actions"><span className="demo-badge"><i /> MODO DEMO</span><button className="primary-button" onClick={() => showNotice("El backend aún no expone un endpoint para iniciar pipelines.")}><Icon name="plus" size={17} /> Nuevo pipeline</button></div>
         </div>
 
@@ -170,11 +177,11 @@ export default function Home() {
 
         {section === "Despliegues" && <div className="deployments-layout"><article className="panel environments-panel"><div className="panel-heading"><div><h2>Entornos</h2><p>3 entornos configurados en modo demostración</p></div><button className="secondary-button" onClick={() => showNotice("Los entornos se cargarán desde el backend.")}><Icon name="plus" size={15} /> Añadir entorno</button></div><div className="environment-cards"><div className="environment-card"><div className="environment-card-head"><span className="env-icon prod-icon">⌂</span><span className="env-state"><i /> Activo</span></div><h3>Producción</h3><p>Entorno principal de clientes</p><div className="env-url">https://api.acme.io <Icon name="external" size={14} /></div><div className="env-deployed"><span>Último despliegue</span><strong>v2.4.0 <small>hace 4 horas</small></strong></div></div><div className="environment-card"><div className="environment-card-head"><span className="env-icon stage-icon">◇</span><span className="env-state"><i /> Activo</span></div><h3>Staging</h3><p>Pruebas antes de producción</p><div className="env-url">https://staging.acme.io <Icon name="external" size={14} /></div><div className="env-deployed"><span>Último despliegue</span><strong>build #184 <small>hace 36 min</small></strong></div></div><div className="environment-card preview-card"><div className="environment-card-head"><span className="env-icon preview-icon">◈</span><span className="env-state"><i /> Activo</span></div><h3>Preview</h3><p>Entornos efímeros por pull request</p><div className="env-url">preview.acme.io <Icon name="external" size={14} /></div><div className="env-deployed"><span>Entornos activos</span><strong>4 previews <small>automáticos</small></strong></div></div></div></article><article className="panel timeline-panel"><div className="panel-heading"><div><h2>Historial de despliegues</h2><p>Publicaciones recientes</p></div></div>{activity.slice(0, 2).map((item) => <div className="activity-item" key={item.title}><span className={`activity-icon ${item.tone}`}>{item.icon}</span><span className="activity-copy"><strong>{item.title}</strong><small>{item.detail}</small></span><span className="activity-time">{item.time}</span></div>)}</article></div>}
 
-        {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Actividad reciente</h2><p>Eventos en tu espacio de trabajo <span className="sample-dot">· datos de muestra</span></p></div><button className="secondary-button" onClick={() => showNotice("Mostrando todos los eventos disponibles.")}>Últimos 7 días <span className="chevron">⌄</span></button></div><div className="activity-date">HOY, 9 DE OCTUBRE</div>{activity.map((item) => <div className="activity-item" key={item.title}><span className={`activity-icon ${item.tone}`}>{item.icon}</span><span className="activity-copy"><strong>{item.title}</strong><small>{item.detail}</small></span><span className="activity-time">{item.time}</span></div>)}</article>}
+        {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Actividad reciente</h2><p>Eventos en tu espacio de trabajo <span className="sample-dot">· datos de muestra</span></p></div><button className="secondary-button" onClick={() => showNotice("Mostrando todos los eventos disponibles.")}>Últimos 7 días <span className="chevron">⌄</span></button></div><div className="activity-date">{todayLabel}</div>{activity.map((item) => <div className="activity-item" key={item.title}><span className={`activity-icon ${item.tone}`}>{item.icon}</span><span className="activity-copy"><strong>{item.title}</strong><small>{item.detail}</small></span><span className="activity-time">{item.time}</span></div>)}</article>}
 
-        {section === "Ajustes" && <div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Define la dirección de tu API Spring Boot.</p></div><span className="connection-badge"><i /> Sin conectar</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" readOnly value={process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"} /></div><p className="settings-help">Configúrala en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Por defecto se usa <code>http://localhost:8080</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>La API aún no está disponible</strong><br />El backend actual solo incluye la aplicación inicial de Spring Boot. Cuando se añadan endpoints, esta interfaz podrá consumirlos desde el servicio <code>src/lib/api.ts</code>.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => showNotice("Guarda NEXT_PUBLIC_API_URL en cdci_front/.env.local para aplicar el cambio.")}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">↗</div><h2>Conecta tus repositorios</h2><p>Automatiza los builds al recibir cambios en GitHub o GitLab.</p><button className="secondary-button" onClick={() => showNotice("La integración estará disponible al crear su endpoint en el backend.")}>Configurar integración <Icon name="arrow" size={14} /></button><span className="integration-coming">PRÓXIMAMENTE</span></article></div>}
+        {section === "Ajustes" && <div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Define la dirección de tu API Spring Boot.</p></div><span className="connection-badge"><i /> Sin conectar</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" type="url" value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} /></div><p className="settings-help">La URL se guarda en este navegador. También puedes configurarla en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Por defecto se usa <code>http://localhost:8080</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>La API aún no está disponible</strong><br />El backend actual solo incluye la aplicación inicial de Spring Boot. Cuando se añadan endpoints, esta interfaz podrá consumirlos desde el servicio <code>src/lib/api.ts</code>.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => { const value = apiUrl.trim().replace(/\/+$/, ""); setApiUrl(value); window.localStorage.setItem("cdci.apiBaseUrl", value); showNotice("URL de la API guardada en este navegador."); }}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">↗</div><h2>Conecta tus repositorios</h2><p>Automatiza los builds al recibir cambios en GitHub o GitLab.</p><button className="secondary-button" onClick={() => showNotice("La integración estará disponible al crear su endpoint en el backend.")}>Configurar integración <Icon name="arrow" size={14} /></button><span className="integration-coming">PRÓXIMAMENTE</span></article></div>}
 
-        <footer className="app-footer"><span>© 2026 Nexo CI/CD</span><span><i className="footer-status" /> Todos los sistemas operativos</span><button onClick={() => showNotice("Nexo CI/CD · Proyecto de demostración")}>Ayuda y documentación</button></footer>
+        <footer className="app-footer"><span>© 2026 CDCI</span><span><i className="footer-status" /> Todos los sistemas operativos</span><button onClick={() => showNotice("CDCI · Proyecto de demostración")}>Ayuda y documentación</button></footer>
       </div>
     </section>
     {notice && <div className="toast" role="status"><span>i</span>{notice}<button aria-label="Cerrar notificación" onClick={() => setNotice("")}>×</button></div>}
