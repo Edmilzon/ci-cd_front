@@ -13,12 +13,16 @@ npm run dev
 
 Abre [http://localhost:3000](http://localhost:3000).
 
+## Registro y sesión
+
+El frontend incluye las pantallas `/register` y `/login`, protege el dashboard con la sesión de Spring Security y permite cerrar sesión desde el perfil. La cookie de sesión `HttpOnly` nunca se lee desde JavaScript; `src/lib/api.ts` envía cookies de forma explícita y solicita un token CSRF antes de cada operación de escritura. Las rutas de administración también necesitan autorización en el backend.
+
 ## Conexión con Spring Boot
 
-La pantalla está preparada para consumir la API mediante `src/lib/api.ts`. Copia `.env.example` a `.env.local` y ajusta la URL si el backend escucha en otro puerto:
+Copia `.env.example` a `.env.local` y ajusta la URL si el backend escucha en otro puerto:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-El backend actual todavía no expone endpoints de pipelines o despliegues. Por eso, el panel muestra datos de demostración y explica qué acciones requieren la API.
+El flujo de identidad consume la API Spring Boot. Las pantallas de pipelines, despliegues y actividad todavía muestran datos de demostración hasta que se definan esos endpoints.

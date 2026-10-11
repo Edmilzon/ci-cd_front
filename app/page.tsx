@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useAuth } from "@/src/auth/AuthProvider";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En curso";
@@ -72,6 +73,7 @@ function PipelineTable({ items, onOpen }: { items: Pipeline[]; onOpen: () => voi
 }
 
 export default function Home() {
+  const { user, signOut } = useAuth();
   const [section, setSection] = useState<Section>("Resumen");
   const [statusFilter, setStatusFilter] = useState<"Todos" | Status>("Todos");
   const [query, setQuery] = useState("");
@@ -128,7 +130,7 @@ export default function Home() {
       <div className="sidebar-bottom">
         <div className="upgrade-card"><span className="upgrade-spark">✳</span><strong>Todo listo para crecer</strong><p>Conecta tu repositorio y automatiza tu próximo despliegue.</p><button onClick={() => showNotice("Pronto podrás conectar GitHub y GitLab desde aquí.")}>Ver integraciones <Icon name="arrow" size={14} /></button></div>
         <button className={`nav-item settings-link ${section === "Ajustes" ? "active" : ""}`} onClick={() => setSection("Ajustes")}><Icon name="settings" /><span>Ajustes</span></button>
-        <div className="user-profile"><span className="user-avatar">MR</span><span className="user-copy"><strong>María Rojas</strong><small>Administradora</small></span><button aria-label="Opciones de perfil" onClick={() => showNotice("Sesión de demostración")}>···</button></div>
+        <div className="user-profile"><span className="user-avatar">{user?.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span><span className="user-copy"><strong>{user?.fullName}</strong><small>{user?.roles.map((role) => role === "ADMIN" ? "Administrador" : role === "VIEWER" ? "Lector" : role).join(", ")}</small></span><button aria-label="Cerrar sesión" title="Cerrar sesión" onClick={() => void signOut().catch(() => showNotice("No pudimos cerrar la sesión. Inténtalo otra vez."))}>↗</button></div>
       </div>
     </aside>
 
@@ -138,7 +140,7 @@ export default function Home() {
         <div className="topbar-actions">
           <label className="search-box"><Icon name="search" size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar pipelines..." /><kbd>⌘ K</kbd></label>
           <button className="icon-button notification-button" aria-label="Notificaciones" onClick={() => showNotice("No tienes notificaciones nuevas.")}><Icon name="bell" size={18} /><i /></button>
-          <span className="top-avatar">MR</span>
+          <span className="top-avatar">{user?.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>
         </div>
       </header>
 
@@ -148,7 +150,7 @@ export default function Home() {
           <div className="heading-actions"><span className="demo-badge"><i /> MODO DEMO</span><button className="primary-button" onClick={() => showNotice("El backend aún no expone un endpoint para iniciar pipelines.")}><Icon name="plus" size={17} /> Nuevo pipeline</button></div>
         </div>
 
-        <div className="demo-note"><span className="demo-note-icon">i</span><span>Estás viendo datos de muestra. El backend Spring Boot aún no define endpoints de pipelines.</span><button onClick={() => setSection("Ajustes")}>Configurar conexión <Icon name="arrow" size={13} /></button></div>
+        <div className="demo-note"><span className="demo-note-icon">i</span><span>La cuenta y el acceso ya están conectados. Pipelines y despliegues todavía muestran datos de muestra.</span><button onClick={() => setSection("Ajustes")}>Configurar conexión <Icon name="arrow" size={13} /></button></div>
 
         {section === "Resumen" && <>
           <div className="stats-grid">
@@ -179,7 +181,7 @@ export default function Home() {
 
         {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Actividad reciente</h2><p>Eventos en tu espacio de trabajo <span className="sample-dot">· datos de muestra</span></p></div><button className="secondary-button" onClick={() => showNotice("Mostrando todos los eventos disponibles.")}>Últimos 7 días <span className="chevron">⌄</span></button></div><div className="activity-date">{todayLabel}</div>{activity.map((item) => <div className="activity-item" key={item.title}><span className={`activity-icon ${item.tone}`}>{item.icon}</span><span className="activity-copy"><strong>{item.title}</strong><small>{item.detail}</small></span><span className="activity-time">{item.time}</span></div>)}</article>}
 
-        {section === "Ajustes" && <div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Define la dirección de tu API Spring Boot.</p></div><span className="connection-badge"><i /> Sin conectar</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" type="url" value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} /></div><p className="settings-help">La URL se guarda en este navegador. También puedes configurarla en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Por defecto se usa <code>http://localhost:8080</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>La API aún no está disponible</strong><br />El backend actual solo incluye la aplicación inicial de Spring Boot. Cuando se añadan endpoints, esta interfaz podrá consumirlos desde el servicio <code>src/lib/api.ts</code>.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => { const value = apiUrl.trim().replace(/\/+$/, ""); setApiUrl(value); window.localStorage.setItem("cdci.apiBaseUrl", value); showNotice("URL de la API guardada en este navegador."); }}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">↗</div><h2>Conecta tus repositorios</h2><p>Automatiza los builds al recibir cambios en GitHub o GitLab.</p><button className="secondary-button" onClick={() => showNotice("La integración estará disponible al crear su endpoint en el backend.")}>Configurar integración <Icon name="arrow" size={14} /></button><span className="integration-coming">PRÓXIMAMENTE</span></article></div>}
+        {section === "Ajustes" && <div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Define la dirección de tu API Spring Boot.</p></div><span className="connection-badge"><i /> Sesión protegida</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" type="url" value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} /></div><p className="settings-help">La URL se guarda en este navegador. También puedes configurarla en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Por defecto se usa <code>http://localhost:8080</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>Autenticación conectada</strong><br />El registro, la sesión y el cierre de sesión se gestionan con la API de Spring Boot. Los datos de pipelines y despliegues aún son de demostración.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => { const value = apiUrl.trim().replace(/\/+$/, ""); setApiUrl(value); window.localStorage.setItem("cdci.apiBaseUrl", value); showNotice("URL de la API guardada en este navegador."); }}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">↗</div><h2>Conecta tus repositorios</h2><p>Automatiza los builds al recibir cambios en GitHub o GitLab.</p><button className="secondary-button" onClick={() => showNotice("La integración estará disponible al crear su endpoint en el backend.")}>Configurar integración <Icon name="arrow" size={14} /></button><span className="integration-coming">PRÓXIMAMENTE</span></article></div>}
 
         <footer className="app-footer"><span>© 2026 CDCI</span><span><i className="footer-status" /> Todos los sistemas operativos</span><button onClick={() => showNotice("CDCI · Proyecto de demostración")}>Ayuda y documentación</button></footer>
       </div>
