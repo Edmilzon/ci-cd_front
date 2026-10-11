@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
@@ -50,6 +51,9 @@ function Icon({ name, size = 18 }: { name: string; size?: number }) {
     arrow: <><path d="M5 12h14M13 6l6 6-6 6"/></>,
     branch: <><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M18 16a8 8 0 0 0-8-8H8"/></>,
     external: <><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></>,
+    users: <><path d="M16 20v-1.6a3.4 3.4 0 0 0-3.4-3.4H6.4A3.4 3.4 0 0 0 3 18.4V20"/><circle cx="9.5" cy="7" r="3.5"/><path d="M17 11a3.5 3.5 0 1 0-1-6.8M17 15h.6a3.4 3.4 0 0 1 3.4 3.4V20"/></>,
+    shield: <><path d="m12 3 8 3v5c0 5.1-3.4 8.5-8 10-4.6-1.5-8-4.9-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></>,
+    audit: <><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="18" cy="19" r="2.5"/><path d="M18 17.5v1.7l1 .6"/></>,
   };
   return <svg {...common}>{paths[name] ?? paths.grid}</svg>;
 }
@@ -121,6 +125,14 @@ export default function Home() {
       <nav className="main-nav" aria-label="Navegación principal">
         {sections.map(({ name, icon }) => <button key={name} className={`nav-item ${section === name ? "active" : ""}`} onClick={() => setSection(name)}><Icon name={icon} /><span>{name}</span>{name === "Pipelines" && <span className="nav-count">4</span>}</button>)}
       </nav>
+      {(user?.permissions?.includes("USER_READ") || user?.permissions?.includes("ROLE_READ") || user?.permissions?.includes("AUDIT_READ")) && <>
+        <div className="nav-label admin-nav-label">ADMINISTRACIÓN</div>
+        <nav className="main-nav" aria-label="Administración">
+          {user?.permissions?.includes("USER_READ") && <Link className="nav-item admin-nav-item" href="/admin/users"><Icon name="users" /><span>Usuarios</span></Link>}
+          {user?.permissions?.includes("ROLE_READ") && <Link className="nav-item admin-nav-item" href="/admin/roles"><Icon name="shield" /><span>Roles y permisos</span></Link>}
+          {user?.permissions?.includes("AUDIT_READ") && <Link className="nav-item admin-nav-item" href="/admin/audit"><Icon name="audit" /><span>Auditoría</span></Link>}
+        </nav>
+      </>}
       <div className="nav-label projects-label">PROYECTOS <button aria-label="Añadir proyecto" onClick={() => showNotice("La conexión de repositorios estará disponible al definir los endpoints del backend.")}>+</button></div>
       <div className="project-nav">
         <button onClick={() => setSection("Pipelines")}><span className="project-dot dot-violet" /> Plataforma web <span className="project-chevron">···</span></button>

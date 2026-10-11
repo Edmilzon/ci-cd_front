@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./auth.css";
+import "./admin.css";
 import { AuthProvider } from "@/src/auth/AuthProvider";
 
 export const metadata: Metadata = {

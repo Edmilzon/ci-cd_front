@@ -48,6 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user && isPublic) router.replace("/");
   }, [pathname, ready, router, user]);
 
+  useEffect(() => {
+    if (!ready || !user) return;
+    const requiredPermission = pathname === "/admin/users" ? "USER_READ"
+      : pathname === "/admin/roles" ? "ROLE_READ"
+      : pathname === "/admin/audit" ? "AUDIT_READ"
+      : null;
+    if (requiredPermission && !user.permissions?.includes(requiredPermission)) router.replace("/");
+  }, [pathname, ready, router, user]);
+
   const signOut = useCallback(async () => {
     await logout();
     setUser(null);
@@ -57,7 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ user, ready, refresh, signOut }), [user, ready, refresh, signOut]);
   const isPublic = publicPaths.has(pathname);
   const awaitingProtectedRoute = !ready && !isPublic;
-  const redirecting = ready && ((user && isPublic) || (!user && !isPublic));
+  const requiredPermission = pathname === "/admin/users" ? "USER_READ"
+    : pathname === "/admin/roles" ? "ROLE_READ"
+    : pathname === "/admin/audit" ? "AUDIT_READ"
+    : null;
+  const forbidden = Boolean(user && requiredPermission && !user.permissions?.includes(requiredPermission));
+  const redirecting = ready && ((user && isPublic) || (!user && !isPublic) || forbidden);
 
   return <AuthContext.Provider value={value}>
     {awaitingProtectedRoute || redirecting ? <div className="auth-loading" role="status">Cargando CDCI…</div> : children}
