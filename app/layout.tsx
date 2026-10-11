@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import "./auth.css";
 import "./admin.css";
+import "./projects.css";
 import { AuthProvider } from "@/src/auth/AuthProvider";
 
 export const metadata: Metadata = {
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es">
-      <body><AuthProvider>{children}</AuthProvider></body>
+      <body><Suspense fallback={<div className="auth-loading" role="status">Cargando CDCI…</div>}><AuthProvider>{children}</AuthProvider></Suspense></body>
     </html>
   );
 }

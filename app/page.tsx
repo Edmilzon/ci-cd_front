@@ -134,14 +134,10 @@ export default function Home() {
           {user?.permissions?.includes("AUDIT_READ") && <Link className="nav-item admin-nav-item" href="/admin/audit"><Icon name="audit" /><span>Auditoría</span></Link>}
         </nav>
       </>}
-      <div className="nav-label projects-label">PROYECTOS <button aria-label="Añadir proyecto" onClick={() => showNotice("La conexión de repositorios estará disponible al definir los endpoints del backend.")}>+</button></div>
-      <div className="project-nav">
-        <button onClick={() => setSection("Pipelines")}><span className="project-dot dot-violet" /> Plataforma web <span className="project-chevron">···</span></button>
-        <button onClick={() => setSection("Pipelines")}><span className="project-dot dot-teal" /> API de usuarios</button>
-        <button onClick={() => setSection("Pipelines")}><span className="project-dot dot-amber" /> Infraestructura</button>
-      </div>
+      <div className="nav-label projects-label">PROYECTOS <Link href="/projects" aria-label="Crear proyecto">+</Link></div>
+      <div className="project-nav"><Link href="/projects" className="project-nav-link"><span className="project-dot dot-violet" /> Administrar proyectos <span className="project-chevron">↗</span></Link></div>
       <div className="sidebar-bottom">
-        <div className="upgrade-card"><span className="upgrade-spark">✳</span><strong>Todo listo para crecer</strong><p>Conecta tu repositorio y automatiza tu próximo despliegue.</p><button onClick={() => showNotice("Pronto podrás conectar GitHub y GitLab desde aquí.")}>Ver integraciones <Icon name="arrow" size={14} /></button></div>
+        <div className="upgrade-card"><span className="upgrade-spark">✳</span><strong>Todo listo para crecer</strong><p>Conecta tu repositorio y automatiza tu próximo despliegue.</p><Link href="/projects">Ver integraciones <Icon name="arrow" size={14} /></Link></div>
         <button className={`nav-item settings-link ${section === "Ajustes" ? "active" : ""}`} onClick={() => setSection("Ajustes")}><Icon name="settings" /><span>Ajustes</span></button>
         <div className="user-profile"><span className="user-avatar">{user?.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span><span className="user-copy"><strong>{user?.fullName}</strong><small>{user?.roles.map((role) => role === "ADMIN" ? "Administrador" : role === "VIEWER" ? "Lector" : role).join(", ")}</small></span><button aria-label="Cerrar sesión" title="Cerrar sesión" onClick={() => void signOut().catch(() => showNotice("No pudimos cerrar la sesión. Inténtalo otra vez."))}>↗</button></div>
       </div>
