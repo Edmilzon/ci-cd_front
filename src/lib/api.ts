@@ -93,4 +93,10 @@ export async function logout() {
   return apiFetch<void>("/api/auth/logout", { method: "POST" });
 }
 
+export async function changePassword(currentPassword: string, newPassword: string) {
+  return apiFetch<void>("/api/auth/password", {
+    method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export { API_BASE_URL };

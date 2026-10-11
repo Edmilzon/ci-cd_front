@@ -15,7 +15,7 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 ## Registro y sesión
 
-El frontend incluye `/register` y `/login`, protege el dashboard con la sesión de Spring Security y permite cerrar sesión. Las vistas `/admin/users`, `/admin/roles` y `/admin/audit` ofrecen gestión de cuentas, permisos y trazabilidad. La cookie de sesión `HttpOnly` nunca se lee desde JavaScript; `src/lib/api.ts` envía cookies de forma explícita y solicita un token CSRF antes de cada operación de escritura. Las vistas restringen controles según los permisos devueltos por el servidor; el backend vuelve a comprobar cada petición.
+El frontend incluye `/register` y `/login`, protege el dashboard con la sesión de Spring Security, permite cambiar la contraseña y cerrar sesión. Las vistas `/admin/users`, `/admin/roles` y `/admin/audit` ofrecen gestión de cuentas, permisos y trazabilidad. La cookie de sesión `HttpOnly` nunca se lee desde JavaScript; `src/lib/api.ts` envía cookies de forma explícita y solicita un token CSRF antes de cada operación de escritura. Las vistas restringen controles según los permisos devueltos por el servidor; el backend vuelve a comprobar cada petición.
 
 ## Conexión con Spring Boot
 
