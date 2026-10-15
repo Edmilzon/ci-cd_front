@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
-import { addPipelineVersion, createPipeline, deletePipeline, getPipelineVersion, getPipelineVersions, getPipelines, getProject, getProjectRepositories, validatePipeline, type Pipeline, type PipelineValidation, type PipelineVersion, type PipelineVersionDetail, type Project, type ProjectRepository } from "@/src/lib/project-api";
+import { addPipelineVersion, createPipeline, deletePipeline, getPipelineRunLogs, getPipelineRuns, getPipelineVersion, getPipelineVersions, getPipelines, getProject, getProjectRepositories, queuePipelineRun, validatePipeline, type Pipeline, type PipelineRun, type PipelineRunLog, type PipelineValidation, type PipelineVersion, type PipelineVersionDetail, type Project, type ProjectRepository } from "@/src/lib/project-api";
 
 function errorMessage(error: unknown) { return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente."; }
 function dateLabel(value: string) { return new Intl.DateTimeFormat("es-BO", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); }
+const runLabels: Record<PipelineRun["status"], string> = { QUEUED: "En cola", RUNNING: "En ejecución", SUCCEEDED: "Completada", FAILED: "Fallida", CANCELLED: "Cancelada" };
 function starterYaml(repositoryName: string) {
   const safeName = repositoryName.trim() || "Build";
   return `name: ${safeName} build\ntriggers:\n  - push\njobs:\n  build:\n    name: Build\n    steps:\n      - name: Install dependencies\n        run: npm ci\n      - name: Build\n        run: npm run build\n`;
@@ -34,6 +35,11 @@ export default function ProjectPipelinesPage() {
   const [yaml, setYaml] = useState("");
   const [validation, setValidation] = useState<PipelineValidation | null>(null);
   const [selectedVersion, setSelectedVersion] = useState(0);
+  const [runs, setRuns] = useState<PipelineRun[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState("");
+  const [runLogs, setRunLogs] = useState<PipelineRunLog[]>([]);
+  const [runBusy, setRunBusy] = useState(false);
+  const [runsLoading, setRunsLoading] = useState(false);
 
   const selected = useMemo(() => pipelines.find((pipeline) => pipeline.id === selectedId) ?? null, [pipelines, selectedId]);
 
@@ -63,6 +69,31 @@ export default function ProjectPipelinesPage() {
       .finally(() => { if (active) setDetailLoading(false); });
     return () => { active = false; };
   }, [projectId, selected?.id, selected?.currentVersion]);
+
+  useEffect(() => {
+    if (!selected) { setRuns([]); setSelectedRunId(""); setRunLogs([]); return; }
+    let active = true;
+    setRuns([]); setSelectedRunId(""); setRunLogs([]);
+    setRunsLoading(true);
+    getPipelineRuns(projectId, selected.id)
+      .then((history) => {
+        if (!active) return;
+        setRuns(history);
+        setSelectedRunId((current) => history.some((run) => run.id === current) ? current : history[0]?.id ?? "");
+      })
+      .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); })
+      .finally(() => { if (active) setRunsLoading(false); });
+    return () => { active = false; };
+  }, [projectId, selected?.id]);
+
+  useEffect(() => {
+    if (!selectedRunId) { setRunLogs([]); return; }
+    let active = true;
+    getPipelineRunLogs(projectId, selectedRunId)
+      .then((entries) => { if (active) setRunLogs(entries); })
+      .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); });
+    return () => { active = false; };
+  }, [projectId, selectedRunId]);
 
   async function changeVersion(number: number) {
     if (!selected) return;
@@ -119,6 +150,32 @@ export default function ProjectPipelinesPage() {
     finally { setBusy(false); }
   }
 
+  async function runNow() {
+    if (!selected || !project) return;
+    const repo = repositories.find((repository) => repository.id === selected.repositoryId);
+    setRunBusy(true); setError("");
+    try {
+      const queued = await queuePipelineRun(project.id, selected.id, repo?.defaultBranch);
+      setNotice(`Ejecución ${queued.id.slice(0, 8)} encolada para ${queued.branchName}.`);
+      setRuns((current) => [queued, ...current.filter((run) => run.id !== queued.id)].slice(0, 100));
+      setSelectedRunId(queued.id);
+    } catch (requestError) { setError(errorMessage(requestError)); }
+    finally { setRunBusy(false); }
+  }
+
+  async function refreshRuns() {
+    if (!selected) return;
+    setRunsLoading(true); setError("");
+    try {
+      const history = await getPipelineRuns(projectId, selected.id);
+      setRuns(history);
+      const targetRunId = history.some((run) => run.id === selectedRunId) ? selectedRunId : history[0]?.id ?? "";
+      setSelectedRunId(targetRunId);
+      setRunLogs(targetRunId ? await getPipelineRunLogs(projectId, targetRunId) : []);
+    } catch (requestError) { setError(errorMessage(requestError)); }
+    finally { setRunsLoading(false); }
+  }
+
   return <main className="projects-shell">
     <header className="projects-topbar"><Link className="projects-brand" href="/" aria-label="CDCI, volver al resumen"><span className="brand-symbol"><i /><i /><i /></span><strong>cdci<span>.</span></strong></Link><nav aria-label="Ruta"><Link href="/projects">Proyectos</Link><span>/</span><Link href={`/projects/${projectId}`}>{project?.name ?? "Proyecto"}</Link><span>/</span><strong>Pipelines</strong></nav><div className="projects-account"><span>{user?.fullName}</span><button onClick={() => void signOut()}>Salir</button></div></header>
 
@@ -129,7 +186,7 @@ export default function ProjectPipelinesPage() {
       {error && <div className="projects-alert" role="alert"><span>!</span>{error}<button onClick={() => setError("")} aria-label="Cerrar error">×</button></div>}
       {notice && <div className="projects-success" role="status">✓ {notice}<button onClick={() => setNotice("")} aria-label="Cerrar aviso">×</button></div>}
 
-      <div className="pipeline-runner-note"><span className="pipeline-note-icon">◷</span><div><strong>Runner pendiente de aislamiento</strong><span>Las definiciones se pueden guardar y versionar. La ejecución se habilitará al configurar un worker aislado.</span></div><span className="pipeline-pending-badge">EJECUCIÓN DESHABILITADA</span></div>
+      <div className="pipeline-runner-note"><span className="pipeline-note-icon">◷</span><div><strong>Cola de ejecuciones activa · worker pendiente</strong><span>Las solicitudes manuales quedan persistidas en cola. Se procesarán cuando esté conectado el worker aislado.</span></div><span className="pipeline-pending-badge">ESPERA WORKER</span></div>
 
       {loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando pipelines…</div>
         : repositories.length === 0 ? <div className="projects-empty"><span className="empty-project-mark">⌘</span><h2>Conecta un repositorio primero</h2><p>Los pipelines se asocian a un repositorio GitHub conectado al proyecto.</p><Link className="projects-primary" href={`/projects/${projectId}`}>Ir al proyecto</Link></div>
@@ -149,10 +206,15 @@ export default function ProjectPipelinesPage() {
                 {validation && <div className={`pipeline-validation ${validation.valid ? "is-valid" : "is-invalid"}`} role="status">{validation.valid ? <><strong>✓ YAML válido</strong><span>{validation.name} · {validation.jobs} trabajos · {validation.steps} pasos</span></> : <><strong>Revisa la definición</strong>{validation.errors.map((item, index) => <span key={index}>• {item}</span>)}</>}</div>}
                 <div className="pipeline-editor-actions"><button type="button" className="projects-secondary" onClick={() => void checkYaml()} disabled={busy || !yaml.trim()}>{busy ? "Validando…" : "Validar YAML"}</button><button className="projects-primary" disabled={busy || !validation?.valid || (creating && !repositoryId)}>{busy ? "Guardando…" : creating ? "Crear versión 1" : "Guardar nueva versión"}</button></div>
               </form> : selected ? <>
-                <div className="pipeline-detail-heading"><div><span className="projects-eyebrow">PIPELINE · {selected.repositoryName}</span><h2>{selected.name}</h2><p>Actualizado {dateLabel(selected.updatedAt)}</p></div><div className="pipeline-detail-actions"><span className="pipeline-version-pill">v{selected.currentVersion}</span>{project?.canManage && <><button className="projects-secondary" onClick={openNewVersion} disabled={detailLoading}>Nueva versión</button><button className="project-danger-outline" onClick={() => void removePipeline()} disabled={busy}>Eliminar</button></>}</div></div>
+                <div className="pipeline-detail-heading"><div><span className="projects-eyebrow">PIPELINE · {selected.repositoryName}</span><h2>{selected.name}</h2><p>Actualizado {dateLabel(selected.updatedAt)}</p></div><div className="pipeline-detail-actions"><span className="pipeline-version-pill">v{selected.currentVersion}</span>{project?.canManage && <><button className="projects-primary" onClick={() => void runNow()} disabled={runBusy}>{runBusy ? "Encolando…" : "▶ Ejecutar"}</button><button className="projects-secondary" onClick={openNewVersion} disabled={detailLoading}>Nueva versión</button><button className="project-danger-outline" onClick={() => void removePipeline()} disabled={busy || runs.length > 0}>Eliminar</button></>}</div></div>
                 <div className="pipeline-version-toolbar"><label>Versión<select value={selectedVersion || selected.currentVersion} onChange={(event) => void changeVersion(Number(event.target.value))}>{versions.map((version) => <option key={version.versionNumber} value={version.versionNumber}>Versión {version.versionNumber} · {dateLabel(version.createdAt)}</option>)}</select></label>{versionDetail && <span>SHA-256 · {versionDetail.sha256.slice(0, 12)}…</span>}</div>
                 {detailLoading ? <div className="projects-state pipeline-loading"><span className="projects-spinner" /> Cargando versión…</div> : versionDetail ? <pre className="pipeline-yaml-view"><code>{versionDetail.yaml}</code></pre> : <div className="pipeline-list-empty">No se pudo cargar esta versión.</div>}
                 {versionDetail && <div className="pipeline-version-byline">Guardada por {versionDetail.createdBy} · {dateLabel(versionDetail.createdAt)}</div>}
+                <div className="pipeline-runs-panel">
+                  <div className="pipeline-runs-heading"><div><strong>Ejecuciones manuales</strong><span>Versiones y resultados solicitados para este pipeline.</span></div><button className="projects-secondary" onClick={() => void refreshRuns()} disabled={runsLoading}>{runsLoading ? "Actualizando…" : "Actualizar"}</button></div>
+                  {runsLoading && !runs.length ? <div className="pipeline-runs-empty"><span className="projects-spinner" /> Cargando historial…</div> : !runs.length ? <div className="pipeline-runs-empty">Aún no hay ejecuciones. Pulsa “Ejecutar” para agregar una a la cola.</div> : <div className="pipeline-runs-list">{runs.map((run) => <button key={run.id} className={`pipeline-run-row ${run.id === selectedRunId ? "is-selected" : ""}`} onClick={() => setSelectedRunId(run.id)}><span className={`run-status-dot status-${run.status.toLowerCase()}`} /><span className="pipeline-run-copy"><strong>{runLabels[run.status]} · v{run.pipelineVersion}</strong><small>{run.branchName} · {dateLabel(run.requestedAt)} · {run.requestedBy}</small></span><span className={`run-status-badge status-${run.status.toLowerCase()}`}>{runLabels[run.status]}</span></button>)}</div>}
+                  {selectedRunId && <div className="pipeline-run-log-box"><div className="pipeline-run-log-heading"><strong>Logs de la ejecución</strong><span>{runLogs.length} eventos</span></div>{runLogs.length ? <div className="pipeline-run-log-list">{runLogs.map((entry) => <div className="pipeline-run-log-line" key={entry.id}><time>{new Intl.DateTimeFormat("es-BO", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(entry.createdAt))}</time><span className={`log-stream stream-${entry.stream.toLowerCase()}`}>{entry.stream}</span><code>{entry.message}</code></div>)}</div> : <div className="pipeline-runs-empty">No hay logs disponibles todavía.</div>}</div>}
+                </div>
               </> : <div className="pipeline-select-empty"><span>◇</span><h2>Selecciona un pipeline</h2><p>El historial y la definición YAML aparecerán aquí.</p></div>}
             </section>
           </div>}

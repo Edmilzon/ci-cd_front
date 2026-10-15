@@ -62,6 +62,21 @@ export type Pipeline = {
 export type PipelineVersion = { versionNumber: number; sha256: string; createdBy: string; createdAt: string };
 export type PipelineVersionDetail = PipelineVersion & { yaml: string };
 export type PipelineValidation = { valid: boolean; name: string | null; jobs: number; steps: number; errors: string[] };
+export type PipelineRun = {
+  id: string;
+  pipelineId: string;
+  pipelineName: string;
+  pipelineVersion: number;
+  branchName: string;
+  triggerType: string;
+  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+  requestedBy: string;
+  requestedAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  failureMessage: string | null;
+};
+export type PipelineRunLog = { id: number; stream: "SYSTEM" | "STDOUT" | "STDERR"; message: string; createdAt: string };
 
 export function getProjects() { return apiFetch<Project[]>("/api/projects"); }
 export function getProject(id: string) { return apiFetch<Project>(`/api/projects/${id}`); }
@@ -107,4 +122,13 @@ export function getPipelineVersion(projectId: string, pipelineId: string, versio
 }
 export function deletePipeline(projectId: string, pipelineId: string) {
   return apiFetch<void>(`/api/projects/${projectId}/pipelines/${pipelineId}`, { method: "DELETE" });
+}
+export function queuePipelineRun(projectId: string, pipelineId: string, branchName?: string) {
+  return apiFetch<PipelineRun>(`/api/projects/${projectId}/pipelines/${pipelineId}/runs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ branchName }) });
+}
+export function getPipelineRuns(projectId: string, pipelineId: string) {
+  return apiFetch<PipelineRun[]>(`/api/projects/${projectId}/pipelines/${pipelineId}/runs`);
+}
+export function getPipelineRunLogs(projectId: string, runId: string, afterId = 0) {
+  return apiFetch<PipelineRunLog[]>(`/api/projects/${projectId}/runs/${runId}/logs?afterId=${afterId}`);
 }
