@@ -49,6 +49,7 @@ test("register and login client preserve the session and CSRF contract", async (
     if (url.endsWith("/api/auth/login")) return jsonResponse(200, { authenticated: true });
     if (url.endsWith("/api/auth/me")) return jsonResponse(200, { id: "user-1", email: "dev@cdci.test" });
     if (url.endsWith("/api/auth/register")) return jsonResponse(201, { verificationRequired: false, emailVerified: true });
+    if (url.endsWith("/api/auth/registration/status")) return jsonResponse(200, { enabled: false });
     throw new Error(`Unexpected request: ${url}`);
   };
   const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl });
@@ -56,6 +57,7 @@ test("register and login client preserve the session and CSRF contract", async (
   await api.login("dev@cdci.test", "correct horse battery staple");
   await api.getCurrentUser();
   await api.registerAccount({ email: "new@cdci.test", fullName: "New User", password: "long-passphrase" });
+  assert.deepEqual(await api.getRegistrationStatus(), { enabled: false });
 
   assert.deepEqual(calls.map(({ url }) => url), [
     "https://api.cdci.test/api/auth/csrf",
@@ -63,6 +65,7 @@ test("register and login client preserve the session and CSRF contract", async (
     "https://api.cdci.test/api/auth/me",
     "https://api.cdci.test/api/auth/csrf",
     "https://api.cdci.test/api/auth/register",
+    "https://api.cdci.test/api/auth/registration/status",
   ]);
   const login = calls[1].init;
   assert.equal(login.method, "POST");
@@ -73,6 +76,8 @@ test("register and login client preserve the session and CSRF contract", async (
   assert.equal(calls[2].init.credentials, "include");
   assert.equal(calls[4].init.headers.get("X-XSRF-TOKEN"), "csrf-test-token");
   assert.equal(JSON.parse(calls[4].init.body).fullName, "New User");
+  assert.equal(calls[5].init.method, "GET");
+  assert.equal(calls[5].init.credentials, "include");
 });
 
 test("API client maps structured authorization errors and 204 responses", async () => {

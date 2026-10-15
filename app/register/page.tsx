@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { ApiError, registerAccount, requestEmailVerification } from "@/src/lib/api";
+import { useEffect, useState, type FormEvent } from "react";
+import { ApiError, getRegistrationStatus, registerAccount, requestEmailVerification } from "@/src/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +16,34 @@ export default function RegisterPage() {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [resendBusy, setResendBusy] = useState(false);
   const [resendNotice, setResendNotice] = useState("");
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [statusError, setStatusError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getRegistrationStatus().then((status) => {
+      if (active) setRegistrationEnabled(status.enabled);
+    }).catch(() => {
+      if (active) setStatusError("No pudimos comprobar si el registro está disponible.");
+    }).finally(() => {
+      if (active) setStatusLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
+
+  async function retryRegistrationStatus() {
+    setStatusError("");
+    setStatusLoading(true);
+    try {
+      const status = await getRegistrationStatus();
+      setRegistrationEnabled(status.enabled);
+    } catch {
+      setStatusError("No pudimos comprobar si el registro está disponible.");
+    } finally {
+      setStatusLoading(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,9 +82,17 @@ export default function RegisterPage() {
     <section className="auth-card" aria-labelledby="register-title">
       <Link className="auth-brand" href="/" aria-label="CDCI, inicio"><span className="brand-symbol"><i /><i /><i /></span><span>cdci<span>.</span></span></Link>
       <p className="auth-eyebrow">EMPIEZA CON CDCI</p>
-      <h1 id="register-title">Crea tu cuenta</h1>
+      <h1 id="register-title">{registrationEnabled === false ? "Registro deshabilitado" : pendingVerification ? "Revisa tu correo" : "Crea tu cuenta"}</h1>
       <p className="auth-description">Un espacio para coordinar las entregas de tu equipo.</p>
-      {pendingVerification ? <div className="verification-pending">
+      {statusLoading ? <p className="auth-hint" role="status">Comprobando si el registro está disponible…</p>
+        : statusError ? <div className="verification-pending">
+          <p className="auth-error" role="alert">{statusError}</p>
+          <button className="auth-submit" type="button" onClick={retryRegistrationStatus}>Reintentar</button>
+        </div>
+        : registrationEnabled === false ? <div className="verification-pending">
+          <p className="password-message" role="status">El registro de cuentas nuevas está cerrado en esta instalación. Solicita acceso a una persona administradora.</p>
+        </div>
+        : pendingVerification ? <div className="verification-pending">
         <div className="password-message password-success" role="status">Te enviamos un enlace de verificación a <strong>{email.trim()}</strong>. Confirma el correo antes de iniciar sesión.</div>
         <button className="auth-submit" type="button" onClick={resendVerification} disabled={resendBusy}>{resendBusy ? "Enviando…" : "Reenviar correo de verificación"}</button>
         {resendNotice && <p className="auth-hint" role="status">{resendNotice}</p>}

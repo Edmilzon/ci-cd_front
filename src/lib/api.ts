@@ -86,6 +86,10 @@ export async function registerAccount(input: { email: string; fullName: string; 
   });
 }
 
+export async function getRegistrationStatus() {
+  return apiFetch<{ enabled: boolean }>("/api/auth/registration/status");
+}
+
 export async function getCurrentUser() {
   return apiFetch<AuthUser>("/api/auth/me");
 }
