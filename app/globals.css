@@ -230,3 +230,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .activity-icon.activity-deployment { background: #fffbef; color: #a17a32; }
 .activity-icon.activity-secret { background: #fff2f0; color: #b65e5a; }
 @media (max-width: 560px) { .activity-panel-actions { gap: 6px; }.activity-panel-actions .filter-select { display: grid; gap: 2px; }.activity-panel-actions .filter-select select { min-width: 90px; } }
+.operational-health-panel { margin-top: 14px; }
+.operational-health-panel .panel-heading { margin-bottom: 16px; }
+.operational-health-result { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 0 11px; border: 1px solid #e9edf1; border-radius: 7px; background: #fcfcfd; color: #52606f; font-size: 10px; }
+.operational-health-result i { width: 8px; height: 8px; border-radius: 50%; background: #c47771; box-shadow: 0 0 0 3px #fff0ed; }
+.operational-health-result i.is-up { background: #31916e; box-shadow: 0 0 0 3px #e7f5ed; }
+.operational-health-result strong { font-weight: 680; }
+.operational-health-result span { margin-left: auto; color: #8993a0; }
+.operational-health-time { display: block; margin-top: 9px; color: #8c96a2; font-size: 9px; }
+.operational-health-error { margin: 8px 0 0; color: #a34e49; font-size: 10px; }

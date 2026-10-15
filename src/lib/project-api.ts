@@ -157,8 +157,10 @@ export type DashboardSummary = {
   recentDeployments: DashboardDeployment[];
   recentActivity: DashboardActivity[];
 };
+export type OperationalHealth = { status: "UP" | "DOWN"; components: Record<string, "UP" | "DOWN"> };
 
 export function getDashboard() { return apiFetch<DashboardSummary>("/api/dashboard"); }
+export function getOperationalHealth() { return apiFetch<OperationalHealth>("/api/health/ready"); }
 
 export function getProjects() { return apiFetch<Project[]>("/api/projects"); }
 export function getProject(id: string) { return apiFetch<Project>(`/api/projects/${id}`); }

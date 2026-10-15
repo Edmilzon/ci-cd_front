@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ChangePasswordForm } from "@/src/auth/ChangePasswordForm";
 import { API_BASE_URL } from "@/src/lib/api";
-import { getDashboard, type ActivityCategory, type DashboardDeployment, type DashboardRun, type DashboardSummary } from "@/src/lib/project-api";
+import { getDashboard, getOperationalHealth, type ActivityCategory, type DashboardDeployment, type DashboardRun, type DashboardSummary, type OperationalHealth } from "@/src/lib/project-api";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En cola" | "En ejecución" | "Cancelado";
@@ -110,6 +110,10 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [apiUrl, setApiUrl] = useState(API_BASE_URL);
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);
+  const [operationalHealth, setOperationalHealth] = useState<OperationalHealth | null>(null);
+  const [healthError, setHealthError] = useState("");
+  const [healthCheckedAt, setHealthCheckedAt] = useState("");
+  const [healthChecking, setHealthChecking] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -123,11 +127,30 @@ export default function Home() {
     finally { setLoading(false); setRefreshing(false); }
   }, []);
 
+  const refreshOperationalHealth = useCallback(async () => {
+    setHealthChecking(true);
+    setHealthError("");
+    try {
+      setOperationalHealth(await getOperationalHealth());
+      setHealthCheckedAt(new Date().toISOString());
+    } catch (requestError) {
+      setOperationalHealth(null);
+      setHealthCheckedAt(new Date().toISOString());
+      setHealthError(requestError instanceof Error ? requestError.message : "No se pudo consultar el estado operativo.");
+    } finally {
+      setHealthChecking(false);
+    }
+  }, []);
+
   useEffect(() => {
     const savedUrl = window.localStorage.getItem("cdci.apiBaseUrl");
     if (savedUrl) setApiUrl(savedUrl);
     void refreshDashboard(true);
   }, [refreshDashboard]);
+
+  useEffect(() => {
+    if (section === "Ajustes") void refreshOperationalHealth();
+  }, [section, refreshOperationalHealth]);
 
   useEffect(() => {
     if (!dashboard?.activeRuns) return;
@@ -240,6 +263,7 @@ export default function Home() {
 
         {section === "Ajustes" && <><div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Dirección de la API Spring Boot.</p></div><span className="connection-badge"><i /> Sesión protegida</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" type="url" value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} /></div><p className="settings-help">La URL se guarda en este navegador y también puedes configurarla en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Valor actual por defecto: <code>{API_BASE_URL}</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>Datos con acceso controlado</strong><br />El dashboard solo recibe proyectos autorizados por la sesión y muestra ejecuciones persistidas en CDCI.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => { const value = apiUrl.trim().replace(/\/+$/, ""); setApiUrl(value); window.localStorage.setItem("cdci.apiBaseUrl", value); showNotice("URL de la API guardada en este navegador."); void refreshDashboard(); }}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">⌘</div><h2>GitHub</h2><p>GitHub es el proveedor de repositorios configurado para esta instalación.</p><Link className="secondary-button" href="/projects">Configurar integración <Icon name="arrow" size={14} /></Link></article></div><ChangePasswordForm /></>}
 
+        {section === "Ajustes" && <article className="panel settings-panel operational-health-panel"><div className="panel-heading"><div><h2>Salud del servicio</h2><p>Verificación de disponibilidad de la API y PostgreSQL.</p></div><button className="secondary-button" onClick={() => void refreshOperationalHealth()} disabled={healthChecking}>{healthChecking ? "Consultando…" : "Consultar"}</button></div><div className="operational-health-result" role="status"><i className={operationalHealth?.status === "UP" ? "is-up" : "is-down"} /><strong>{operationalHealth?.status === "UP" ? "Operativo" : healthChecking ? "Consultando" : "No disponible"}</strong><span>API · base de datos</span></div>{healthError && <p className="operational-health-error" role="alert">{healthError}</p>}<small className="operational-health-time">{healthCheckedAt ? `Última consulta: ${new Intl.DateTimeFormat("es-BO", { dateStyle: "medium", timeStyle: "short", timeZone: "America/La_Paz" }).format(new Date(healthCheckedAt))}` : "Sin consultas en esta sesión"}</small></article>}
         <footer className="app-footer"><span>© 2026 CDCI</span><span><i className="footer-status" /> API {error ? "sin conexión" : "conectada"}</span><Link href="/projects">Ayuda y proyectos</Link></footer>
       </div>
     </section>
