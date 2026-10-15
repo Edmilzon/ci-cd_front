@@ -25,7 +25,7 @@ Copia `.env.example` a `.env.local` y ajusta la URL si el backend escucha en otr
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-El flujo de identidad consume la API Spring Boot. Las pantallas de pipelines, despliegues y actividad todavía muestran datos de demostración hasta que se definan esos endpoints.
+El flujo de identidad, los proyectos, pipelines, despliegues y actividad consumen la API Spring Boot. La ejecución real requiere que el runner Docker y los permisos de la GitHub App estén configurados en el entorno.
 
 ## Releases
 
@@ -33,6 +33,6 @@ El workflow GitHub Actions publica un tag validado a `staging` o `production` y 
 
 ## Proyectos y repositorios
 
-`/projects` crea y busca proyectos; el detalle permite editar, archivar, agregar miembros registrados con roles por proyecto y seleccionar repositorios desde GitHub. El frontend no recibe ni almacena tokens de GitHub: el backend gestiona OAuth, cifrado, renovación y revocación. Para habilitar el botón de conexión, sigue la sección **Proyectos y GitHub** del README del backend y configura su GitHub App.
+`/projects` crea y busca proyectos; el detalle permite editar, archivar, agregar miembros registrados con roles por proyecto, seleccionar repositorios desde GitHub y revisar el estado de integración y protección de la rama principal. El frontend no recibe ni almacena tokens de GitHub: el backend gestiona OAuth, cifrado, renovación, validación y revocación. Para habilitar el botón de conexión, sigue la sección **Proyectos y GitHub** del README del backend y configura su GitHub App.
 
 Después de autorizar, GitHub vuelve al backend en `CDCI_GITHUB_CALLBACK_URL`, que conserva la sesión CDCI y redirige a `/projects`. En producción el dominio, callback y política SameSite de la cookie deben quedar alineados.

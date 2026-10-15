@@ -71,6 +71,8 @@ export type GitHubRepository = {
 
 export type GitHubRepositoryPage = { items: GitHubRepository[]; page: number; pageSize: number; hasMore: boolean };
 export type GitHubConnection = { connected: boolean; githubLogin: string | null; accessTokenExpiresAt: string | null };
+export type RepositoryReadinessCheck = { code: string; status: "PASS" | "WARNING" | "NOT_VERIFIED"; title: string; detail: string };
+export type RepositoryReadiness = { checkedAt: string; repositoryName: string; checks: RepositoryReadinessCheck[] };
 export type ProjectRole = ProjectMember["accessLevel"];
 
 export type Pipeline = {
@@ -183,6 +185,9 @@ export function updateProjectMember(id: string, userId: string, accessLevel: Pro
 }
 export function removeProjectMember(id: string, userId: string) { return apiFetch<void>(`/api/projects/${id}/members/${userId}`, { method: "DELETE" }); }
 export function getProjectRepositories(id: string) { return apiFetch<ProjectRepository[]>(`/api/projects/${id}/repositories`); }
+export function checkProjectRepositoryReadiness(projectId: string, repositoryId: string) {
+	return apiFetch<RepositoryReadiness>(`/api/projects/${projectId}/repositories/${repositoryId}/readiness`, { method: "POST" });
+}
 export function addProjectRepository(id: string, githubRepositoryId: number) {
   return apiFetch<ProjectRepository>(`/api/projects/${id}/repositories`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubRepositoryId }) });
 }
