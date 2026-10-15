@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  generateBuildId: async () => process.env.CDCI_BUILD_ID ?? "cdci-local",
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
