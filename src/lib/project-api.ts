@@ -34,6 +34,8 @@ export type ProjectRepository = {
   createdAt: string;
 };
 
+export type ProjectSecret = { name: string; updatedBy: string; updatedAt: string };
+
 export type GitHubRepository = {
   id: number;
   fullName: string;
@@ -100,6 +102,13 @@ export function addProjectRepository(id: string, githubRepositoryId: number) {
   return apiFetch<ProjectRepository>(`/api/projects/${id}/repositories`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ githubRepositoryId }) });
 }
 export function removeProjectRepository(id: string, repositoryId: string) { return apiFetch<void>(`/api/projects/${id}/repositories/${repositoryId}`, { method: "DELETE" }); }
+export function getProjectSecrets(id: string) { return apiFetch<ProjectSecret[]>(`/api/projects/${id}/secrets`); }
+export function saveProjectSecret(id: string, name: string, value: string) {
+  return apiFetch<ProjectSecret>(`/api/projects/${id}/secrets/${encodeURIComponent(name)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value }) });
+}
+export function deleteProjectSecret(id: string, name: string) {
+  return apiFetch<void>(`/api/projects/${id}/secrets/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
 export function getGitHubConnection() { return apiFetch<GitHubConnection>("/api/integrations/github/status"); }
 export function beginGitHubConnection() { return apiFetch<{ authorizationUrl: string }>("/api/integrations/github/connect", { method: "POST" }); }
 export function disconnectGitHub() { return apiFetch<void>("/api/integrations/github/connection", { method: "DELETE" }); }

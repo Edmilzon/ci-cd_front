@@ -131,6 +131,29 @@
 .member-controls select { min-width: 118px; height: 29px; padding: 0 7px; border: 1px solid #e8ebf0; border-radius: 6px; background: #fff; color: #727d89; font-size: 8px; }
 .member-controls select:disabled { background: #f7f8fa; color: #a3aab4; }
 .member-role-label { color: #8272ca; font-size: 8px; }
+.secrets-icon { background: #fff3e5; color: #b67825; }
+.secret-count { color: #959eaa; font-size: 9px; }
+.secret-security-note { display: grid; gap: 4px; margin: 3px 0 14px; padding: 10px 12px; border: 1px solid #f1e5cd; border-radius: 7px; background: #fffcf6; }
+.secret-security-note strong { color: #896a36; font-size: 9px; }
+.secret-security-note span { color: #95886e; font-size: 8px; line-height: 1.5; }
+.secret-alert { margin: 8px 0; }
+.secret-form { display: grid; grid-template-columns: minmax(150px, .7fr) minmax(190px, 1fr) auto; align-items: end; gap: 9px; margin: 3px 0 14px; padding: 13px; border: 1px solid #edf0f4; border-radius: 8px; background: #fbfcfe; }
+.secret-form label { display: grid; gap: 6px; color: #707b88; font-size: 8px; font-weight: 630; }
+.secret-form input { width: 100%; height: 34px; padding: 0 9px; border: 1px solid #e4e8ed; border-radius: 7px; outline: none; background: #fff; color: #424b58; font: inherit; font-size: 9px; }
+.secret-form input:focus { border-color: #b7aaf1; box-shadow: 0 0 0 3px rgb(112 89 231 / 9%); }
+.secret-form button { height: 34px; white-space: nowrap; }
+.secret-form > small { grid-column: 1 / -1; color: #9ba3ad; font-size: 8px; }
+.secret-list { display: grid; }
+.secret-row { display: flex; min-height: 55px; align-items: center; gap: 10px; border-top: 1px solid #f0f1f4; }
+.secret-key-icon { display: grid; width: 29px; height: 29px; flex: 0 0 auto; place-items: center; border: 1px solid #f0e4c9; border-radius: 50%; background: #fffcf6; color: #ae8743; font-size: 8px; letter-spacing: 1px; }
+.secret-copy { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.secret-copy strong { color: #535d69; font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.secret-copy small { color: #9ba3ad; font-size: 8px; }
+.secret-never-shown { color: #8e7a54; font-size: 8px; }
+.secret-loading { min-height: 58px; border: 0; }
+.secret-empty { min-height: 115px; }
+.secret-yaml-help { margin: 12px 0 0; color: #8f99a5; font-size: 8px; }
+.secret-yaml-help code { padding: 3px 5px; border-radius: 4px; background: #f4f2fb; color: #7365b3; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
 .project-provider-card { display: flex; align-items: center; gap: 12px; margin: 14px 0; padding: 13px 15px; border: 1px solid #e9ebef; border-radius: 8px; background: #fff; }
 .project-provider-card .github-mark { width: 33px; height: 33px; border-radius: 9px; font-size: 17px; }
 .project-footer { margin-top: 34px; color: #a6adb7; font-size: 8px; text-align: center; }
@@ -305,6 +328,12 @@
   .project-section-heading { align-items: flex-start; }
   .project-section-heading > .projects-primary { padding: 0 8px; white-space: nowrap; }
   .project-section-heading p { max-width: 200px; line-height: 1.4; }
+  .secret-form { grid-template-columns: 1fr; padding: 10px; }
+  .secret-form > small { grid-column: auto; }
+  .secret-form > button { width: 100%; }
+  .secret-row { gap: 7px; }
+  .secret-copy small { overflow-wrap: anywhere; }
+  .secret-never-shown { display: none; }
   .project-github-callout { align-items: flex-start; flex-direction: column; }
   .project-github-callout > button { width: 100%; }
   .linked-repository { gap: 7px; }

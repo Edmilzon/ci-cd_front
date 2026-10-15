@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
+import ProjectSecretsPanel from "./secrets-panel";
 import { addProjectMember, addProjectRepository, archiveProject, beginGitHubConnection, disconnectGitHub, getGitHubConnection, getGitHubRepositories, getProject, getProjectMembers, getProjectRepositories, removeProjectMember, removeProjectRepository, updateProject, updateProjectMember, type GitHubConnection, type GitHubRepository, type GitHubRepositoryPage, type Project, type ProjectMember, type ProjectRepository, type ProjectRole } from "@/src/lib/project-api";
 
 const accessNames: Record<string, string> = { OWNER: "Propietario", MAINTAINER: "Mantenedor", DEVELOPER: "Desarrollador", VIEWER: "Lector", ADMIN: "Administrador" };
@@ -132,6 +133,8 @@ export default function ProjectDetailPage() {
       <div className="project-stats"><article><span>Repositorios</span><strong>{repositories.length}</strong></article><article><span>Miembros</span><strong>{members.length}</strong></article><article><span>Tu acceso</span><strong>{accessNames[project?.accessLevel ?? ""] ?? "—"}</strong></article></div>
 
       {project && <Link className="project-pipelines-link" href={`/projects/${project.id}/pipelines`}><span className="section-icon">⌘</span><span><strong>Configurar pipelines</strong><small>Define YAML, valida cambios y consulta el historial de versiones.</small></span><span className="project-card-arrow">↗</span></Link>}
+
+      {project?.canManage && <ProjectSecretsPanel projectId={project.id} />}
 
       <section className="project-section-card">
         <div className="project-section-heading"><div><span className="section-icon">⌘</span><div><h2>Repositorios</h2><p>Fuentes de código conectadas a este proyecto.</p></div></div>{project?.canManage && github?.connected && <button className="projects-primary" onClick={() => setRepoDialogOpen(true)}>＋ Agregar repositorio</button>}</div>
