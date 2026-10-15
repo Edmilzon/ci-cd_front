@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { ApiError, registerAccount } from "@/src/lib/api";
+import { ApiError, registerAccount, requestEmailVerification } from "@/src/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +13,9 @@ export default function RegisterPage() {
   const [confirmation, setConfirmation] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendNotice, setResendNotice] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,13 +26,27 @@ export default function RegisterPage() {
     }
     setBusy(true);
     try {
-      await registerAccount({ email: email.trim(), fullName: fullName.trim(), password });
-      router.replace("/login?registered=1");
+      const account = await registerAccount({ email: email.trim(), fullName: fullName.trim(), password });
+      if (account.verificationRequired && !account.emailVerified) setPendingVerification(true);
+      else router.replace("/login?registered=1");
     } catch (cause) {
       const validation = cause instanceof ApiError ? Object.values(cause.fields ?? {})[0] : undefined;
       setError(validation ?? (cause instanceof ApiError ? cause.message : "No pudimos crear la cuenta. Revisa el backend e inténtalo otra vez."));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function resendVerification() {
+    setResendNotice("");
+    setResendBusy(true);
+    try {
+      await requestEmailVerification(email.trim());
+      setResendNotice("Si la cuenta está pendiente de verificación, recibirás otro correo con los siguientes pasos.");
+    } catch {
+      setResendNotice("No pudimos enviar el correo ahora. Inténtalo de nuevo más tarde.");
+    } finally {
+      setResendBusy(false);
     }
   }
 
@@ -39,7 +56,11 @@ export default function RegisterPage() {
       <p className="auth-eyebrow">EMPIEZA CON CDCI</p>
       <h1 id="register-title">Crea tu cuenta</h1>
       <p className="auth-description">Un espacio para coordinar las entregas de tu equipo.</p>
-      <form className="auth-form" onSubmit={submit}>
+      {pendingVerification ? <div className="verification-pending">
+        <div className="password-message password-success" role="status">Te enviamos un enlace de verificación a <strong>{email.trim()}</strong>. Confirma el correo antes de iniciar sesión.</div>
+        <button className="auth-submit" type="button" onClick={resendVerification} disabled={resendBusy}>{resendBusy ? "Enviando…" : "Reenviar correo de verificación"}</button>
+        {resendNotice && <p className="auth-hint" role="status">{resendNotice}</p>}
+      </div> : <form className="auth-form" onSubmit={submit}>
         <label htmlFor="fullName">Nombre completo</label>
         <input id="fullName" name="fullName" autoComplete="name" minLength={2} maxLength={80} value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Cómo te llamas" required />
         <label htmlFor="email">Correo electrónico</label>
@@ -51,7 +72,7 @@ export default function RegisterPage() {
         <p className="auth-hint">Usa una frase larga que no compartas con otros servicios.</p>
         {error && <p className="auth-error" role="alert">{error}</p>}
         <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Creando cuenta…" : "Crear cuenta"}</button>
-      </form>
+      </form>}
       <p className="auth-switch">¿Ya tienes cuenta? <Link href="/login">Iniciar sesión</Link></p>
       <p className="auth-security"><span aria-hidden="true">⌑</span> Las nuevas cuentas empiezan con acceso de lectura.</p>
     </section>

@@ -66,6 +66,7 @@ export type AuthUser = {
   roles: string[];
   createdAt?: string | null;
   permissions: string[];
+  emailVerified?: boolean;
 };
 
 export async function login(email: string, password: string) {
@@ -78,7 +79,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function registerAccount(input: { email: string; fullName: string; password: string }) {
-  return apiFetch<AuthUser>("/api/auth/register", {
+  return apiFetch<{ verificationRequired: boolean; emailVerified: boolean }>("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -112,6 +113,18 @@ export async function getPasswordResetStatus() {
 export async function resetPassword(token: string, newPassword: string) {
   return apiFetch<void>("/api/auth/password-reset/confirm", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, newPassword }),
+  });
+}
+
+export async function requestEmailVerification(email: string) {
+  return apiFetch<{ message: string }>("/api/auth/email-verification/resend", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }),
+  });
+}
+
+export async function confirmEmailVerification(token: string) {
+  return apiFetch<void>("/api/auth/email-verification/confirm", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }),
   });
 }
 

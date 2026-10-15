@@ -48,7 +48,7 @@ test("register and login client preserve the session and CSRF contract", async (
     if (url.endsWith("/api/auth/csrf")) return jsonResponse(200, { token: "csrf-test-token" });
     if (url.endsWith("/api/auth/login")) return jsonResponse(200, { authenticated: true });
     if (url.endsWith("/api/auth/me")) return jsonResponse(200, { id: "user-1", email: "dev@cdci.test" });
-    if (url.endsWith("/api/auth/register")) return jsonResponse(201, { id: "user-2", email: "new@cdci.test" });
+    if (url.endsWith("/api/auth/register")) return jsonResponse(201, { verificationRequired: false, emailVerified: true });
     throw new Error(`Unexpected request: ${url}`);
   };
   const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl });
@@ -117,6 +117,28 @@ test("password recovery uses the public status and CSRF-protected reset routes",
   assert.equal(JSON.parse(calls[2].init.body).email, "dev@cdci.test");
   assert.equal(calls[4].url, "https://api.cdci.test/api/auth/password-reset/confirm");
   assert.equal(JSON.parse(calls[4].init.body).token, "opaque-one-time-token");
+});
+
+test("email verification uses CSRF-protected resend and confirm routes", async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    if (url.endsWith("/api/auth/csrf")) return jsonResponse(200, { token: "csrf-verify" });
+    if (url.endsWith("/api/auth/email-verification/resend")) return jsonResponse(202, { message: "If pending, check your email." });
+    if (url.endsWith("/api/auth/email-verification/confirm")) return { ok: true, status: 204 };
+    throw new Error(`Unexpected request: ${url}`);
+  };
+  const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl });
+
+  await api.requestEmailVerification("dev@cdci.test");
+  await api.confirmEmailVerification("opaque-verification-token");
+
+  assert.equal(calls[0].url, "https://api.cdci.test/api/auth/csrf");
+  assert.equal(calls[1].url, "https://api.cdci.test/api/auth/email-verification/resend");
+  assert.equal(calls[1].init.headers.get("X-XSRF-TOKEN"), "csrf-verify");
+  assert.equal(JSON.parse(calls[1].init.body).email, "dev@cdci.test");
+  assert.equal(calls[3].url, "https://api.cdci.test/api/auth/email-verification/confirm");
+  assert.equal(JSON.parse(calls[3].init.body).token, "opaque-verification-token");
 });
 
 test("pipeline and production deployment calls match the backend routes", async () => {
