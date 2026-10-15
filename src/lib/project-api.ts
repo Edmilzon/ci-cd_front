@@ -79,6 +79,35 @@ export type PipelineRun = {
   failureMessage: string | null;
 };
 export type PipelineRunLog = { id: number; stream: "SYSTEM" | "STDOUT" | "STDERR"; message: string; createdAt: string };
+export type DashboardRun = {
+  id: string;
+  projectId: string;
+  pipelineId: string;
+  projectName: string;
+  pipelineName: string;
+  repositoryName: string;
+  branchName: string;
+  version: number;
+  status: PipelineRun["status"];
+  requestedBy: string;
+  requestedAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  durationMillis: number | null;
+};
+export type DashboardDailyRuns = { day: string; succeeded: number; failed: number; active: number };
+export type DashboardSummary = {
+  projectCount: number;
+  pipelineCount: number;
+  runsToday: number;
+  activeRuns: number;
+  successRate30Days: number;
+  medianDurationMillis30Days: number | null;
+  dailyRuns: DashboardDailyRuns[];
+  recentRuns: DashboardRun[];
+};
+
+export function getDashboard() { return apiFetch<DashboardSummary>("/api/dashboard"); }
 
 export function getProjects() { return apiFetch<Project[]>("/api/projects"); }
 export function getProject(id: string) { return apiFetch<Project>(`/api/projects/${id}`); }

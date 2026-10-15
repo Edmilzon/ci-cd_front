@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { addPipelineVersion, createPipeline, deletePipeline, getPipelineRunLogs, getPipelineRuns, getPipelineVersion, getPipelineVersions, getPipelines, getProject, getProjectRepositories, queuePipelineRun, validatePipeline, type Pipeline, type PipelineRun, type PipelineRunLog, type PipelineValidation, type PipelineVersion, type PipelineVersionDetail, type Project, type ProjectRepository } from "@/src/lib/project-api";
@@ -29,6 +29,9 @@ function starterYaml(repositoryName: string) {
 
 export default function ProjectPipelinesPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const searchParams = useSearchParams();
+  const requestedPipelineId = searchParams.get("pipelineId") ?? "";
+  const requestedRunId = searchParams.get("runId") ?? "";
   const { user, signOut } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [repositories, setRepositories] = useState<ProjectRepository[]>([]);
@@ -71,6 +74,10 @@ export default function ProjectPipelinesPage() {
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
+    if (requestedPipelineId && pipelines.some((pipeline) => pipeline.id === requestedPipelineId)) setSelectedId(requestedPipelineId);
+  }, [pipelines, requestedPipelineId]);
+
+  useEffect(() => {
     if (!selected) { setVersions([]); setVersionDetail(null); return; }
     let active = true;
     setDetailLoading(true);
@@ -93,12 +100,13 @@ export default function ProjectPipelinesPage() {
       .then((history) => {
         if (!active) return;
         setRuns(history);
-        setSelectedRunId((current) => history.some((run) => run.id === current) ? current : history[0]?.id ?? "");
+        setSelectedRunId((current) => history.some((run) => run.id === current) ? current
+          : history.some((run) => run.id === requestedRunId) ? requestedRunId : history[0]?.id ?? "");
       })
       .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); })
       .finally(() => { if (active) setRunsLoading(false); });
     return () => { active = false; };
-  }, [projectId, selected?.id]);
+  }, [projectId, selected?.id, requestedRunId]);
 
   useEffect(() => {
     if (!selectedRunId) { lastRunLogId.current = 0; runLogsReady.current = false; setRunLogs([]); return; }
