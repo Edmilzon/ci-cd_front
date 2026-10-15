@@ -95,6 +95,30 @@ test("API client maps structured authorization errors and 204 responses", async 
   assert.equal(await api.apiFetch("/api/auth/logout", { method: "POST" }), undefined);
 });
 
+test("password recovery uses the public status and CSRF-protected reset routes", async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    if (url.endsWith("/api/auth/csrf")) return jsonResponse(200, { token: "csrf-recovery" });
+    if (url.endsWith("/api/auth/password-reset/status")) return jsonResponse(200, { enabled: true });
+    if (url.endsWith("/api/auth/password-reset/request")) return jsonResponse(202, { message: "If the account exists, check your email." });
+    if (url.endsWith("/api/auth/password-reset/confirm")) return { ok: true, status: 204 };
+    throw new Error(`Unexpected request: ${url}`);
+  };
+  const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl });
+
+  assert.deepEqual(await api.getPasswordResetStatus(), { enabled: true });
+  await api.requestPasswordReset("dev@cdci.test");
+  await api.resetPassword("opaque-one-time-token", "a-unique-long-password");
+
+  assert.equal(calls[0].init.method, "GET");
+  assert.equal(calls[1].url, "https://api.cdci.test/api/auth/csrf");
+  assert.equal(calls[2].init.headers.get("X-XSRF-TOKEN"), "csrf-recovery");
+  assert.equal(JSON.parse(calls[2].init.body).email, "dev@cdci.test");
+  assert.equal(calls[4].url, "https://api.cdci.test/api/auth/password-reset/confirm");
+  assert.equal(JSON.parse(calls[4].init.body).token, "opaque-one-time-token");
+});
+
 test("pipeline and production deployment calls match the backend routes", async () => {
   const calls = [];
   const apiFetch = async (path, options = {}) => {

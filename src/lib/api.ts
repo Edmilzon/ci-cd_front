@@ -99,4 +99,20 @@ export async function changePassword(currentPassword: string, newPassword: strin
   });
 }
 
+export async function requestPasswordReset(email: string) {
+  return apiFetch<{ message: string }>("/api/auth/password-reset/request", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }),
+  });
+}
+
+export async function getPasswordResetStatus() {
+  return apiFetch<{ enabled: boolean }>("/api/auth/password-reset/status");
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  return apiFetch<void>("/api/auth/password-reset/confirm", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, newPassword }),
+  });
+}
+
 export { API_BASE_URL };

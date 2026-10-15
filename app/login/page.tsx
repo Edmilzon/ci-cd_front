@@ -43,6 +43,7 @@ export default function LoginPage() {
         {error && <p className="auth-error" role="alert">{error}</p>}
         <button className="auth-submit" type="submit" disabled={busy}>{busy ? "Iniciando sesión…" : "Iniciar sesión"}</button>
       </form>
+      <p className="auth-switch auth-recovery"><Link href="/forgot-password">¿Olvidaste tu contraseña?</Link></p>
       <p className="auth-switch">¿Todavía no tienes cuenta? <Link href="/register">Crear una cuenta</Link></p>
       <p className="auth-security"><span aria-hidden="true">⌑</span> Tu sesión se protege con una cookie segura.</p>
     </section>
