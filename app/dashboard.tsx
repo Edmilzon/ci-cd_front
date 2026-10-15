@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ChangePasswordForm } from "@/src/auth/ChangePasswordForm";
 import { API_BASE_URL } from "@/src/lib/api";
-import { getDashboard, type DashboardRun, type DashboardSummary } from "@/src/lib/project-api";
+import { getDashboard, type DashboardDeployment, type DashboardRun, type DashboardSummary } from "@/src/lib/project-api";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En cola" | "En ejecución" | "Cancelado";
@@ -97,6 +97,14 @@ function activityTone(status: DashboardRun["status"]) {
   if (status === "SUCCEEDED") return "success";
   if (status === "FAILED" || status === "CANCELLED") return "failure";
   return "running";
+}
+
+function deploymentStatusLabel(status: DashboardDeployment["status"]) {
+  const labels: Record<DashboardDeployment["status"], string> = {
+    WAITING_APPROVAL: "Espera aprobación", APPROVED: "Aprobado", IN_PROGRESS: "En curso",
+    SUCCEEDED: "Exitoso", FAILED: "Fallido", REJECTED: "Rechazado",
+  };
+  return labels[status];
 }
 
 export default function Home() {
@@ -226,7 +234,7 @@ export default function Home() {
 
         {section === "Pipelines" && <article className="panel full-list-panel"><div className="panel-heading"><div><h2>Ejecuciones</h2><p>{dashboard?.recentRuns.length ?? 0} resultados recientes, máximo 50</p></div><div className="filter-select"><label htmlFor="status-filter">Estado</label><select id="status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Todos" | Status)}><option>Todos</option><option>Exitoso</option><option>Fallido</option><option>En cola</option><option>En ejecución</option><option>Cancelado</option></select></div></div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando ejecuciones…</div> : <PipelineTable items={filteredRuns} />}</article>}
 
-        {section === "Despliegues" && <article className="panel environments-panel"><div className="panel-heading"><div><h2>Destinos de despliegue</h2><p>Estado conectado al backend</p></div></div><div className="dashboard-empty"><strong>Sin destinos configurados</strong><p>Los despliegues aún no están habilitados para estos proyectos.</p><Link href="/projects" className="secondary-button">Abrir proyectos</Link></div></article>}
+        {section === "Despliegues" && <article className="panel environments-panel"><div className="panel-heading"><div><h2>Despliegues recientes</h2><p>Publicaciones y aprobaciones en tus proyectos visibles</p></div><button className="secondary-button" onClick={() => void refreshDashboard()} disabled={refreshing}>{refreshing ? "Actualizando…" : "Actualizar"}</button></div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando despliegues…</div> : dashboard?.recentDeployments.length ? <div className="dashboard-deployments">{dashboard.recentDeployments.map((deployment) => <Link className="dashboard-deployment-row" key={deployment.id} href={`/projects/${deployment.projectId}`}><span className={`dashboard-deployment-mark status-${deployment.status.toLowerCase()}`}>⇧</span><span className="dashboard-deployment-copy"><strong>{deployment.pipelineName} <i>{deployment.environmentName}</i></strong><small>{deployment.projectName} · {deployment.repositoryName} · {deployment.sourceCommitSha.slice(0, 12)}</small></span><span className={`dashboard-deployment-status status-${deployment.status.toLowerCase()}`}>{deploymentStatusLabel(deployment.status)}</span><span className="row-arrow"><Icon name="arrow" size={16} /></span></Link>)}</div> : <div className="dashboard-empty"><strong>Aún no hay despliegues</strong><p>Los despliegues registrados en GitHub aparecerán aquí.</p><Link href="/projects" className="secondary-button">Abrir proyectos</Link></div>}</article>}
 
         {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Actividad reciente</h2><p>Runs de tus proyectos visibles</p></div><button className="secondary-button" onClick={() => void refreshDashboard()} disabled={refreshing}>{refreshing ? "Actualizando…" : "Actualizar"}</button></div><div className="activity-date">{todayLabel}</div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando actividad…</div> : pageRuns.length ? pageRuns.map((run) => <div className="activity-item" key={run.id}><span className={"activity-icon " + activityTone(run.status)}>{run.status === "SUCCEEDED" ? "✓" : run.status === "FAILED" || run.status === "CANCELLED" ? "!" : "↗"}</span><span className="activity-copy"><strong>{run.pipelineName} · {statusFor(run.status)}</strong><small>{run.projectName} · {run.repositoryName} · {run.branchName} · por {run.requestedBy}</small></span><span className="activity-time">{relativeTime(run.requestedAt)}</span></div>) : <div className="dashboard-empty"><strong>No hay actividad que mostrar</strong><p>Las ejecuciones de los proyectos visibles aparecerán aquí.</p></div>}</article>}
 

@@ -35,6 +35,27 @@ export type ProjectRepository = {
 };
 
 export type ProjectSecret = { name: string; updatedBy: string; updatedAt: string };
+export type ProjectDeployment = {
+  id: string;
+  runId: string;
+  projectId: string;
+  pipelineId: string;
+  projectName: string;
+  pipelineName: string;
+  repositoryName: string;
+  branchName: string;
+  environmentName: string;
+  sourceCommitSha: string;
+  status: "WAITING_APPROVAL" | "APPROVED" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED" | "REJECTED";
+  requestedBy: string;
+  approvedBy: string | null;
+  requestedAt: string;
+  approvedAt: string | null;
+  completedAt: string | null;
+  githubDeploymentId: number | null;
+  githubHtmlUrl: string | null;
+  rollbackOfDeploymentId: string | null;
+};
 
 export type GitHubRepository = {
   id: number;
@@ -95,6 +116,19 @@ export type DashboardRun = {
   completedAt: string | null;
   durationMillis: number | null;
 };
+export type DashboardDeployment = {
+  id: string;
+  projectId: string;
+  runId: string;
+  projectName: string;
+  pipelineName: string;
+  repositoryName: string;
+  environmentName: string;
+  sourceCommitSha: string;
+  status: ProjectDeployment["status"];
+  requestedAt: string;
+  githubHtmlUrl: string | null;
+};
 export type DashboardDailyRuns = { day: string; succeeded: number; failed: number; active: number };
 export type DashboardSummary = {
   projectCount: number;
@@ -105,6 +139,7 @@ export type DashboardSummary = {
   medianDurationMillis30Days: number | null;
   dailyRuns: DashboardDailyRuns[];
   recentRuns: DashboardRun[];
+  recentDeployments: DashboardDeployment[];
 };
 
 export function getDashboard() { return apiFetch<DashboardSummary>("/api/dashboard"); }
@@ -137,6 +172,16 @@ export function saveProjectSecret(id: string, name: string, value: string) {
 }
 export function deleteProjectSecret(id: string, name: string) {
   return apiFetch<void>(`/api/projects/${id}/secrets/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+export function getProjectDeployments(id: string) { return apiFetch<ProjectDeployment[]>(`/api/projects/${id}/deployments`); }
+export function approveProjectDeployment(projectId: string, deploymentId: string) {
+  return apiFetch<ProjectDeployment>(`/api/projects/${projectId}/deployments/${deploymentId}/approve`, { method: "POST" });
+}
+export function rejectProjectDeployment(projectId: string, deploymentId: string) {
+  return apiFetch<ProjectDeployment>(`/api/projects/${projectId}/deployments/${deploymentId}/reject`, { method: "POST" });
+}
+export function rollbackProjectDeployment(projectId: string, deploymentId: string) {
+  return apiFetch<PipelineRun>(`/api/projects/${projectId}/deployments/${deploymentId}/rollback`, { method: "POST" });
 }
 export function getGitHubConnection() { return apiFetch<GitHubConnection>("/api/integrations/github/status"); }
 export function beginGitHubConnection() { return apiFetch<{ authorizationUrl: string }>("/api/integrations/github/connect", { method: "POST" }); }

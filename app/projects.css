@@ -352,3 +352,40 @@
   .repo-picker-row .projects-secondary { min-height: 28px; padding: 0 8px; }
   .repo-picker-row .linked-repo-copy > span { max-width: 155px; }
 }
+
+.deployment-panel { margin-top: 14px; }
+.deployment-icon { background: #eff8f3; color: #4b9768; }
+.deployment-alert { margin: 10px 0; }
+.deployment-empty { min-height: 155px; }
+.deployment-empty code { padding: 3px 5px; border-radius: 4px; background: #f4f2fb; color: #7365b3; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.deployment-list { display: grid; margin-top: 10px; border: 1px solid #edf0f4; border-radius: 8px; overflow: hidden; }
+.deployment-row { display: flex; min-width: 0; align-items: flex-start; gap: 10px; padding: 13px 10px; border-bottom: 1px solid #f0f1f4; }
+.deployment-row:last-child { border-bottom: 0; }
+.deployment-mark { display: grid; width: 29px; height: 29px; flex: 0 0 auto; place-items: center; border: 1px solid #e7eaf0; border-radius: 8px; background: #f8f9fb; color: #84909d; font-size: 13px; }
+.deployment-mark.status-succeeded { border-color: #dcebe2; background: #f7fcf8; color: #508463; }
+.deployment-mark.status-failed, .deployment-mark.status-rejected { border-color: #f0dddd; background: #fff8f8; color: #b65e5a; }
+.deployment-mark.status-waiting_approval { border-color: #f0e6cb; background: #fffcf4; color: #9a7d3f; }
+.deployment-mark.status-in_progress, .deployment-mark.status-approved { border-color: #e2e5fa; background: #f8f8ff; color: #686db8; }
+.deployment-main { display: grid; min-width: 0; flex: 1; gap: 6px; }
+.deployment-title { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.deployment-title > strong { color: #4a5260; font-size: 9px; }
+.deployment-environment { padding: 3px 6px; border: 1px solid #e8e5f6; border-radius: 99px; background: #fcfbff; color: #7e71c5; font: 7px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.deployment-status { padding: 3px 6px; border: 1px solid #eceef2; border-radius: 99px; background: #fafbfc; color: #818b98; font-size: 7px; }
+.deployment-status.status-succeeded { border-color: #dcebe2; background: #f7fcf8; color: #508463; }
+.deployment-status.status-failed, .deployment-status.status-rejected { border-color: #f0dddd; background: #fff8f8; color: #b65e5a; }
+.deployment-status.status-waiting_approval { border-color: #f0e6cb; background: #fffcf4; color: #9a7d3f; }
+.deployment-status.status-in_progress, .deployment-status.status-approved { border-color: #e2e5fa; background: #f8f8ff; color: #686db8; }
+.deployment-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #929ba6; font-size: 7px; }
+.deployment-meta code { color: #777f8e; font: 7px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.deployment-approver, .deployment-rollback-note { color: #7c8793; font-size: 7px; }
+.deployment-actions { display: flex; max-width: 410px; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 5px; }
+.deployment-actions .projects-primary, .deployment-actions .projects-secondary, .deployment-actions .project-danger-outline { min-height: 28px; padding: 0 8px; font-size: 7px; white-space: nowrap; }
+.deployment-github-link { padding: 5px 3px; color: #7766c5; font-size: 7px; text-decoration: none; white-space: nowrap; }
+.deployment-self-review { flex-basis: 100%; color: #9b824c; font-size: 7px; text-align: right; }
+.deployment-standard-note { margin-top: 10px; color: #9ba3ad; font-size: 7px; line-height: 1.5; }
+@media (max-width: 720px) {
+  .deployment-row { flex-wrap: wrap; }
+  .deployment-main { flex-basis: calc(100% - 42px); }
+  .deployment-actions { width: 100%; max-width: none; justify-content: flex-start; padding-left: 39px; }
+  .deployment-self-review { text-align: left; }
+}
