@@ -49,6 +49,20 @@ export type GitHubRepositoryPage = { items: GitHubRepository[]; page: number; pa
 export type GitHubConnection = { connected: boolean; githubLogin: string | null; accessTokenExpiresAt: string | null };
 export type ProjectRole = ProjectMember["accessLevel"];
 
+export type Pipeline = {
+  id: string;
+  repositoryId: string;
+  repositoryName: string;
+  name: string;
+  currentVersion: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PipelineVersion = { versionNumber: number; sha256: string; createdBy: string; createdAt: string };
+export type PipelineVersionDetail = PipelineVersion & { yaml: string };
+export type PipelineValidation = { valid: boolean; name: string | null; jobs: number; steps: number; errors: string[] };
+
 export function getProjects() { return apiFetch<Project[]>("/api/projects"); }
 export function getProject(id: string) { return apiFetch<Project>(`/api/projects/${id}`); }
 export function createProject(input: { name: string; slug?: string; description: string }) {
@@ -75,3 +89,22 @@ export function getGitHubConnection() { return apiFetch<GitHubConnection>("/api/
 export function beginGitHubConnection() { return apiFetch<{ authorizationUrl: string }>("/api/integrations/github/connect", { method: "POST" }); }
 export function disconnectGitHub() { return apiFetch<void>("/api/integrations/github/connection", { method: "DELETE" }); }
 export function getGitHubRepositories(page = 1) { return apiFetch<GitHubRepositoryPage>(`/api/integrations/github/repositories?page=${page}`); }
+export function getPipelines(projectId: string) { return apiFetch<Pipeline[]>(`/api/projects/${projectId}/pipelines`); }
+export function validatePipeline(projectId: string, yaml: string) {
+  return apiFetch<PipelineValidation>(`/api/projects/${projectId}/pipelines/validate`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ yaml }) });
+}
+export function createPipeline(projectId: string, repositoryId: string, yaml: string) {
+  return apiFetch<Pipeline>(`/api/projects/${projectId}/pipelines`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repositoryId, yaml }) });
+}
+export function addPipelineVersion(projectId: string, pipelineId: string, yaml: string) {
+  return apiFetch<PipelineVersion>(`/api/projects/${projectId}/pipelines/${pipelineId}/versions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ yaml }) });
+}
+export function getPipelineVersions(projectId: string, pipelineId: string) {
+  return apiFetch<PipelineVersion[]>(`/api/projects/${projectId}/pipelines/${pipelineId}/versions`);
+}
+export function getPipelineVersion(projectId: string, pipelineId: string, version: number) {
+  return apiFetch<PipelineVersionDetail>(`/api/projects/${projectId}/pipelines/${pipelineId}/versions/${version}`);
+}
+export function deletePipeline(projectId: string, pipelineId: string) {
+  return apiFetch<void>(`/api/projects/${projectId}/pipelines/${pipelineId}`, { method: "DELETE" });
+}

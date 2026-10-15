@@ -131,6 +131,8 @@ export default function ProjectDetailPage() {
 
       <div className="project-stats"><article><span>Repositorios</span><strong>{repositories.length}</strong></article><article><span>Miembros</span><strong>{members.length}</strong></article><article><span>Tu acceso</span><strong>{accessNames[project?.accessLevel ?? ""] ?? "—"}</strong></article></div>
 
+      {project && <Link className="project-pipelines-link" href={`/projects/${project.id}/pipelines`}><span className="section-icon">⌘</span><span><strong>Configurar pipelines</strong><small>Define YAML, valida cambios y consulta el historial de versiones.</small></span><span className="project-card-arrow">↗</span></Link>}
+
       <section className="project-section-card">
         <div className="project-section-heading"><div><span className="section-icon">⌘</span><div><h2>Repositorios</h2><p>Fuentes de código conectadas a este proyecto.</p></div></div>{project?.canManage && github?.connected && <button className="projects-primary" onClick={() => setRepoDialogOpen(true)}>＋ Agregar repositorio</button>}</div>
         {!github?.connected && <div className="project-github-callout"><div><strong>Conecta GitHub para seleccionar repositorios</strong><span>CDCI usará las credenciales autorizadas y las guardará cifradas.</span></div><button className="projects-dark" onClick={() => void connectGitHub()} disabled={busy}>{busy ? "Conectando…" : "Conectar GitHub"}</button></div>}

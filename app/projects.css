@@ -150,6 +150,84 @@
 .project-nav-link:hover { background: #f8f8fa; color: #5e4ac7; }
 .upgrade-card > a { display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: #6d57d9; cursor: pointer; font-size: 9px; font-weight: 650; text-decoration: none; }
 
+.project-pipelines-link { display: flex; align-items: center; gap: 11px; margin: 13px 0; padding: 13px 16px; border: 1px solid #e8e5f6; border-radius: 9px; background: linear-gradient(105deg, #fff 0%, #fbfaff 100%); color: inherit; text-decoration: none; transition: .15s ease; }
+.project-pipelines-link:hover { border-color: #d4cdf6; box-shadow: 0 4px 16px rgb(37 31 74 / 6%); }
+.project-pipelines-link > span:nth-child(2) { display: grid; flex: 1; gap: 4px; }
+.project-pipelines-link strong { color: #464d5a; font-size: 10px; }
+.project-pipelines-link small { color: #929ba6; font-size: 9px; }
+.pipeline-page > .projects-heading { margin-bottom: 20px; }
+.pipeline-runner-note { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding: 13px 15px; border: 1px solid #eee8d7; border-radius: 8px; background: #fffdf7; }
+.pipeline-note-icon { display: grid; width: 30px; height: 30px; flex-shrink: 0; place-items: center; border-radius: 8px; background: #fbf4df; color: #a8883e; font-size: 16px; }
+.pipeline-runner-note > div { display: grid; flex: 1; gap: 4px; }
+.pipeline-runner-note strong { color: #625944; font-size: 9px; }
+.pipeline-runner-note > div > span { color: #968d79; font-size: 8px; }
+.pipeline-pending-badge { padding: 5px 8px; border: 1px solid #efe3c4; border-radius: 99px; background: #fffaf0; color: #9d824d; font-size: 7px; font-weight: 720; letter-spacing: .04em; }
+.pipeline-layout { display: grid; min-height: 410px; grid-template-columns: minmax(220px, .72fr) minmax(0, 1.8fr); gap: 13px; }
+.pipeline-list-card, .pipeline-detail-card { min-width: 0; overflow: hidden; border: 1px solid #e8ebf0; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgb(20 30 45 / 2%); }
+.pipeline-list-heading { display: flex; height: 54px; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #eff0f3; }
+.pipeline-list-heading > div { display: grid; gap: 3px; }
+.pipeline-list-heading strong { color: #4a5260; font-size: 10px; }
+.pipeline-list-heading span { color: #9aa2ad; font-size: 8px; }
+.pipeline-plus { width: 27px; height: 27px; border: 1px solid #e7e2fa; border-radius: 7px; background: #f9f7ff; color: #715bd0; cursor: pointer; font-size: 17px; }
+.pipeline-list { display: grid; padding: 6px; }
+.pipeline-list-item { display: flex; min-width: 0; align-items: center; gap: 9px; padding: 10px 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; text-align: left; cursor: pointer; }
+.pipeline-list-item:hover { background: #faf9ff; }
+.pipeline-list-item.is-selected { border-color: #e8e3fa; background: #f8f6ff; }
+.pipeline-file-icon { display: grid; width: 28px; height: 28px; flex-shrink: 0; place-items: center; border: 1px solid #e6e2f8; border-radius: 7px; background: white; color: #7667c7; font-size: 13px; }
+.pipeline-list-copy { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.pipeline-list-copy strong, .pipeline-list-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pipeline-list-copy strong { color: #555e6b; font-size: 9px; font-weight: 670; }
+.pipeline-list-copy small { color: #9aa2ad; font-size: 7px; }
+.pipeline-version-pill { padding: 4px 6px; border: 1px solid #e9e6f6; border-radius: 99px; background: #fcfbff; color: #7e71c5; font-size: 7px; font-weight: 690; }
+.pipeline-list-empty, .pipeline-select-empty { display: grid; min-height: 220px; align-content: center; justify-items: center; gap: 7px; padding: 20px; color: #8c96a2; text-align: center; }
+.pipeline-list-empty > span, .pipeline-select-empty > span { color: #8879d9; font-size: 23px; }
+.pipeline-list-empty strong, .pipeline-select-empty h2 { margin: 0; color: #59616e; font-size: 10px; }
+.pipeline-list-empty p, .pipeline-select-empty p { margin: 0 0 4px; color: #9aa2ad; font-size: 8px; line-height: 1.5; }
+.pipeline-detail-card { min-height: 410px; }
+.pipeline-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid #eff0f3; }
+.pipeline-detail-heading h2 { margin: 5px 0 3px; color: #3c4350; font-size: 14px; }
+.pipeline-detail-heading p { margin: 0; color: #9ba3ad; font-size: 8px; }
+.pipeline-detail-actions { display: flex; align-items: center; gap: 7px; }
+.pipeline-detail-actions .projects-secondary, .pipeline-detail-actions .project-danger-outline { min-height: 29px; padding: 0 9px; font-size: 8px; }
+.pipeline-version-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #f0f1f4; }
+.pipeline-version-toolbar label { display: flex; align-items: center; gap: 8px; color: #828c99; font-size: 8px; }
+.pipeline-version-toolbar select { max-width: 290px; height: 29px; padding: 0 8px; border: 1px solid #e6e9ee; border-radius: 6px; background: white; color: #586371; font-size: 8px; }
+.pipeline-version-toolbar > span { overflow: hidden; color: #a1a8b2; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.pipeline-yaml-view, .pipeline-yaml-input { min-height: 260px; margin: 0; padding: 16px 18px; overflow: auto; border: 0; background: #20242c; color: #d7dceb; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; line-height: 1.75; tab-size: 2; white-space: pre; }
+.pipeline-yaml-view code { color: inherit; }
+.pipeline-version-byline { padding: 11px 18px; border-top: 1px solid #f0f1f4; color: #a1a8b2; font-size: 8px; }
+.pipeline-editor { padding-bottom: 15px; }
+.pipeline-editor .pipeline-detail-heading { margin-bottom: 15px; }
+.pipeline-form-label { display: grid; gap: 7px; margin: 0 18px 14px; color: #6c7683; font-size: 8px; font-weight: 660; }
+.pipeline-form-label select { height: 33px; padding: 0 9px; border: 1px solid #e4e8ed; border-radius: 6px; background: #fff; color: #4d5866; font-size: 9px; }
+.pipeline-yaml-input { width: calc(100% - 36px); min-height: 250px; resize: vertical; border: 1px solid #343943; border-radius: 7px; outline: none; }
+.pipeline-yaml-input:focus { border-color: #8574e1; box-shadow: 0 0 0 2px rgb(112 89 231 / 13%); }
+.pipeline-editor-help { display: flex; flex-wrap: wrap; gap: 7px; margin: -5px 18px 12px; }
+.pipeline-editor-help span { padding: 5px 7px; border: 1px solid #eceef2; border-radius: 5px; background: #fafbfc; color: #87919e; font-size: 7px; }
+.pipeline-validation { display: grid; gap: 5px; margin: 0 18px 12px; padding: 10px; border: 1px solid #e5e8ed; border-radius: 7px; font-size: 8px; line-height: 1.45; }
+.pipeline-validation.is-valid { border-color: #d9eadf; background: #f8fcf9; color: #4f8161; }
+.pipeline-validation.is-invalid { border-color: #f0d9d5; background: #fffafa; color: #a34e49; }
+.pipeline-validation > strong { font-size: 9px; }
+.pipeline-editor-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 18px; }
+.pipeline-editor-actions .projects-secondary, .pipeline-editor-actions .projects-primary { min-height: 32px; font-size: 8px; }
+.pipeline-loading { min-height: 210px; border: 0; }
+@media (max-width: 700px) {
+  .pipeline-layout { grid-template-columns: 1fr; }
+  .pipeline-runner-note { align-items: flex-start; flex-wrap: wrap; }
+  .pipeline-runner-note > div { flex-basis: calc(100% - 46px); }
+  .pipeline-pending-badge { margin-left: 42px; }
+}
+@media (max-width: 520px) {
+  .pipeline-detail-heading { padding: 14px 11px; }
+  .pipeline-detail-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .pipeline-version-toolbar { align-items: flex-start; flex-direction: column; padding: 10px 11px; }
+  .pipeline-yaml-view { padding: 13px 11px; font-size: 8px; }
+  .pipeline-yaml-input { width: calc(100% - 22px); margin-left: 11px; padding: 12px 10px; }
+  .pipeline-form-label { margin-right: 11px; margin-left: 11px; }
+  .pipeline-editor-help, .pipeline-validation { margin-right: 11px; margin-left: 11px; }
+  .pipeline-editor-actions { padding: 0 11px; }
+}
+
 @media (max-width: 900px) {
   .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .projects-topbar { padding: 0 24px; }
