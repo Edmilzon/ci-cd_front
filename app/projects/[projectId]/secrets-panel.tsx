@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { deferEffect } from "@/src/lib/defer-effect";
 import { ApiError } from "@/src/lib/api";
 import { deleteProjectSecret, getProjectSecrets, saveProjectSecret, type ProjectSecret } from "@/src/lib/project-api";
 
@@ -28,7 +29,7 @@ export default function ProjectSecretsPanel({ projectId }: { projectId: string }
     finally { setLoading(false); }
   }, [projectId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

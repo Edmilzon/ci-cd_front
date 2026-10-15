@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { addPipelineVersion, createPipeline, deletePipeline, getPipelineRunLogs, getPipelineRuns, getPipelineVersion, getPipelineVersions, getPipelines, getProject, getProjectRepositories, queuePipelineRun, validatePipeline, type Pipeline, type PipelineRun, type PipelineRunLog, type PipelineValidation, type PipelineVersion, type PipelineVersionDetail, type Project, type ProjectRepository } from "@/src/lib/project-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 function errorMessage(error: unknown) { return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente."; }
 function dateLabel(value: string) { return new Intl.DateTimeFormat("es-BO", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); }
@@ -71,13 +72,13 @@ export default function ProjectPipelinesPage() {
     finally { setLoading(false); }
   }, [projectId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
-  useEffect(() => {
+  useEffect(() => deferEffect(() => {
     if (requestedPipelineId && pipelines.some((pipeline) => pipeline.id === requestedPipelineId)) setSelectedId(requestedPipelineId);
-  }, [pipelines, requestedPipelineId]);
+  }), [pipelines, requestedPipelineId]);
 
-  useEffect(() => {
+  useEffect(() => deferEffect(() => {
     if (!selected) { setVersions([]); setVersionDetail(null); return; }
     let active = true;
     setDetailLoading(true);
@@ -89,9 +90,9 @@ export default function ProjectPipelinesPage() {
       .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); })
       .finally(() => { if (active) setDetailLoading(false); });
     return () => { active = false; };
-  }, [projectId, selected?.id, selected?.currentVersion]);
+  }), [projectId, selected]);
 
-  useEffect(() => {
+  useEffect(() => deferEffect(() => {
     if (!selected) { setRuns([]); setSelectedRunId(""); setRunLogs([]); return; }
     let active = true;
     setRuns([]); setSelectedRunId(""); setRunLogs([]);
@@ -106,9 +107,9 @@ export default function ProjectPipelinesPage() {
       .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); })
       .finally(() => { if (active) setRunsLoading(false); });
     return () => { active = false; };
-  }, [projectId, selected?.id, requestedRunId]);
+  }), [projectId, selected, requestedRunId]);
 
-  useEffect(() => {
+  useEffect(() => deferEffect(() => {
     if (!selectedRunId) { lastRunLogId.current = 0; runLogsReady.current = false; setRunLogs([]); return; }
     let active = true;
     lastRunLogId.current = 0; runLogsReady.current = false; setRunLogs([]);
@@ -116,7 +117,7 @@ export default function ProjectPipelinesPage() {
       .then((entries) => { if (active) { setRunLogs(entries.slice(-250)); lastRunLogId.current = entries.at(-1)?.id ?? 0; runLogsReady.current = true; } })
       .catch((requestError: unknown) => { if (active) setError(errorMessage(requestError)); });
     return () => { active = false; };
-  }, [projectId, selectedRunId]);
+  }), [projectId, selectedRunId]);
 
   const hasActiveRuns = runs.some((run) => run.status === "QUEUED" || run.status === "RUNNING");
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function ProjectPipelinesPage() {
       })();
     }, 5000);
     return () => { active = false; window.clearInterval(timer); };
-  }, [projectId, selected?.id, selectedRunId, hasActiveRuns]);
+  }, [projectId, selected, selectedRunId, hasActiveRuns]);
 
   async function changeVersion(number: number) {
     if (!selected) return;

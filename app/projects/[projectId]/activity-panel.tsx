@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ApiError } from "@/src/lib/api";
 import { getProjectActivity, type ActivityCategory, type ProjectActivityPage } from "@/src/lib/project-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 const categories: { value: "ALL" | ActivityCategory; label: string }[] = [
   { value: "ALL", label: "Toda la actividad" },
@@ -35,7 +36,7 @@ export default function ProjectActivityPanel({ projectId }: { projectId: string 
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
 
-  useEffect(() => {
+  useEffect(() => deferEffect(() => {
     let active = true;
     setLoading(true);
     setError("");
@@ -47,7 +48,7 @@ export default function ProjectActivityPanel({ projectId }: { projectId: string 
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [projectId, category, page, retry]);
+  }), [projectId, category, page, retry]);
 
   function changeCategory(value: "ALL" | ActivityCategory) {
     setCategory(value);

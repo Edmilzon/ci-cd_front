@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { beginGitHubConnection, createProject, getGitHubConnection, getProjects, type GitHubConnection, type Project } from "@/src/lib/project-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 function messageOf(error: unknown) {
   return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente.";
@@ -43,8 +44,8 @@ export default function ProjectsPage() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
-  useEffect(() => {
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
+  useEffect(() => deferEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("github") === "connected") {
       setNotice("GitHub quedó conectado a tu cuenta.");
@@ -57,7 +58,7 @@ export default function ProjectsPage() {
       setError("GitHub no pudo completar la conexión. Revisa la configuración de la App y vuelve a intentarlo.");
       window.history.replaceState({}, "", "/projects");
     }
-  }, []);
+  }), []);
 
   const visibleProjects = useMemo(() => {
     const needle = search.trim().toLowerCase();

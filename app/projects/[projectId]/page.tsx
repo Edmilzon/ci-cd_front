@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
+import { deferEffect } from "@/src/lib/defer-effect";
 import ProjectSecretsPanel from "./secrets-panel";
 import ProjectDeploymentsPanel from "./deployments-panel";
 import ProjectActivityPanel from "./activity-panel";
@@ -18,6 +19,7 @@ function dateLabel(value: string) { return new Intl.DateTimeFormat("es-BO", { da
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
@@ -55,14 +57,14 @@ export default function ProjectDetailPage() {
     }
   }, [projectId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
   const owner = project?.accessLevel === "OWNER" || project?.accessLevel === "ADMIN";
   const owners = useMemo(() => members.filter((member) => member.accessLevel === "OWNER").length, [members]);
 
   async function connectGitHub() {
     setBusy(true); setError("");
-    try { const result = await beginGitHubConnection(); window.location.assign(result.authorizationUrl); }
+    try { const result = await beginGitHubConnection(); window.location.href = result.authorizationUrl; }
     catch (requestError) { setError(errorMessage(requestError)); setBusy(false); }
   }
 
@@ -77,7 +79,7 @@ export default function ProjectDetailPage() {
   async function archive() {
     if (!project || !window.confirm(`¿Archivar “${project.name}”? Dejará de aparecer en la lista activa.`)) return;
     setBusy(true); setError("");
-    try { await archiveProject(project.id); window.location.assign("/projects"); }
+    try { await archiveProject(project.id); router.replace("/projects"); }
     catch (requestError) { setError(errorMessage(requestError)); setBusy(false); }
   }
 
@@ -182,7 +184,7 @@ function RepositoryPicker({ projectId, onClose, onAdded }: { projectId: string; 
     catch (requestError) { setError(errorMessage(requestError)); }
     finally { setLoading(false); }
   }, []);
-  useEffect(() => { void loadPage(1); }, [loadPage]);
+  useEffect(() => deferEffect(() => { void loadPage(1); }), [loadPage]);
   const filtered = useMemo(() => (page?.items ?? []).filter((repo) => `${repo.fullName} ${repo.description} ${repo.language}`.toLowerCase().includes(query.trim().toLowerCase())), [page, query]);
 
   async function add(repository: GitHubRepository) {

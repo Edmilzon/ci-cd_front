@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { getAuditEvents, type AuditEvent, type PageResponse } from "@/src/lib/admin-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 const actionNames: Record<string, string> = {
   USER_ENABLED: "Cuenta habilitada",
@@ -31,7 +32,7 @@ export default function AdminAuditPage() {
     finally { setLoading(false); }
   }, [page]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
   return <main className="admin-page">
     <header className="admin-topbar"><Link className="admin-back" href="/">← Volver al dashboard</Link><span>Administración de acceso</span><span className="admin-user-chip">{user?.fullName}</span></header>

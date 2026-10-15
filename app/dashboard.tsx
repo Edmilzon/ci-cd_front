@@ -6,6 +6,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ChangePasswordForm } from "@/src/auth/ChangePasswordForm";
 import { API_BASE_URL } from "@/src/lib/api";
 import { getDashboard, getOperationalHealth, type ActivityCategory, type DashboardDeployment, type DashboardRun, type DashboardSummary, type OperationalHealth } from "@/src/lib/project-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En cola" | "En ejecución" | "Cancelado";
@@ -108,7 +109,9 @@ export default function Home() {
   const [activityCategory, setActivityCategory] = useState<"ALL" | ActivityCategory>("ALL");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const [apiUrl, setApiUrl] = useState(API_BASE_URL);
+  const [apiUrl, setApiUrl] = useState(() => typeof window === "undefined"
+    ? API_BASE_URL
+    : window.localStorage.getItem("cdci.apiBaseUrl") || API_BASE_URL);
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);
   const [operationalHealth, setOperationalHealth] = useState<OperationalHealth | null>(null);
   const [healthError, setHealthError] = useState("");
@@ -142,15 +145,13 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const savedUrl = window.localStorage.getItem("cdci.apiBaseUrl");
-    if (savedUrl) setApiUrl(savedUrl);
+  useEffect(() => deferEffect(() => {
     void refreshDashboard(true);
-  }, [refreshDashboard]);
+  }), [refreshDashboard]);
 
-  useEffect(() => {
-    if (section === "Ajustes") void refreshOperationalHealth();
-  }, [section, refreshOperationalHealth]);
+  useEffect(() => section === "Ajustes"
+    ? deferEffect(() => { void refreshOperationalHealth(); })
+    : undefined, [section, refreshOperationalHealth]);
 
   useEffect(() => {
     if (!dashboard?.activeRuns) return;

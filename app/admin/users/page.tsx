@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { getRoles, getUsers, updateUserRoles, updateUserStatus, type AdminUser, type PageResponse, type Role } from "@/src/lib/admin-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 const roleNames: Record<string, string> = { ADMIN: "Administrador", MAINTAINER: "Mantenedor", DEVELOPER: "Desarrollador", VIEWER: "Lector" };
 
@@ -38,7 +39,7 @@ export default function AdminUsersPage() {
     }
   }, [page, search]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

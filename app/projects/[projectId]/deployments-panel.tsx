@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { deferEffect } from "@/src/lib/defer-effect";
 import Link from "next/link";
 import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
@@ -35,7 +36,7 @@ export default function ProjectDeploymentsPanel({ projectId, canManage }: { proj
     finally { setLoading(false); }
   }, [projectId]);
 
-  useEffect(() => { void refresh(true); }, [refresh]);
+  useEffect(() => deferEffect(() => { void refresh(true); }), [refresh]);
 
   const hasActive = deployments.some((deployment) => ["WAITING_APPROVAL", "APPROVED", "IN_PROGRESS"].includes(deployment.status));
   useEffect(() => {

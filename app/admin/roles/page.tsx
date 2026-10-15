@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { createRole, deleteRole, getPermissions, getRoles, updateRole, updateRolePermissions, type Permission, type Role } from "@/src/lib/admin-api";
+import { deferEffect } from "@/src/lib/defer-effect";
 
 function displayError(error: unknown) {
   return error instanceof ApiError ? error.message : "No pudimos completar la solicitud. Revisa la conexión e inténtalo otra vez.";
@@ -48,7 +49,7 @@ export default function AdminRolesPage() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => deferEffect(() => { void load(); }), [load]);
 
   function chooseRole(role: Role) {
     setSelectedCode(role.code);
