@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ChangePasswordForm } from "@/src/auth/ChangePasswordForm";
 import { API_BASE_URL } from "@/src/lib/api";
-import { getDashboard, type DashboardDeployment, type DashboardRun, type DashboardSummary } from "@/src/lib/project-api";
+import { getDashboard, type ActivityCategory, type DashboardDeployment, type DashboardRun, type DashboardSummary } from "@/src/lib/project-api";
 
 type Section = "Resumen" | "Pipelines" | "Despliegues" | "Actividad" | "Ajustes";
 type Status = "Exitoso" | "Fallido" | "En cola" | "En ejecución" | "Cancelado";
@@ -93,12 +93,6 @@ function RunChart({ data }: { data: DashboardSummary["dailyRuns"] }) {
   </div>;
 }
 
-function activityTone(status: DashboardRun["status"]) {
-  if (status === "SUCCEEDED") return "success";
-  if (status === "FAILED" || status === "CANCELLED") return "failure";
-  return "running";
-}
-
 function deploymentStatusLabel(status: DashboardDeployment["status"]) {
   const labels: Record<DashboardDeployment["status"], string> = {
     WAITING_APPROVAL: "Espera aprobación", APPROVED: "Aprobado", IN_PROGRESS: "En curso",
@@ -111,6 +105,7 @@ export default function Home() {
   const { user, signOut } = useAuth();
   const [section, setSection] = useState<Section>("Resumen");
   const [statusFilter, setStatusFilter] = useState<"Todos" | Status>("Todos");
+  const [activityCategory, setActivityCategory] = useState<"ALL" | ActivityCategory>("ALL");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [apiUrl, setApiUrl] = useState(API_BASE_URL);
@@ -146,12 +141,18 @@ export default function Home() {
     return matchesStatus && haystack.includes(query.trim().toLowerCase());
   }), [dashboard, statusFilter, query]);
 
+  const filteredActivity = useMemo(() => (dashboard?.recentActivity ?? []).filter((item) => {
+    const matchesCategory = activityCategory === "ALL" || item.category === activityCategory;
+    const haystack = `${item.summary} ${item.actorEmail} ${item.projectName} ${item.action}`.toLowerCase();
+    return matchesCategory && haystack.includes(query.trim().toLowerCase());
+  }), [dashboard, activityCategory, query]);
+
   const todayLabel = useMemo(() => new Intl.DateTimeFormat("es-BO", { timeZone: "America/La_Paz", weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()).replace(",", "").toUpperCase(), []);
   const pageTitles: Record<Section, { title: string; subtitle: string }> = {
     Resumen: { title: "Resumen", subtitle: "Estado real de tus proyectos y ejecuciones." },
     Pipelines: { title: "Pipelines", subtitle: "Busca y revisa las ejecuciones recientes de tus proyectos." },
     Despliegues: { title: "Despliegues", subtitle: "Destinos y publicaciones de tus pipelines." },
-    Actividad: { title: "Actividad", subtitle: "Ejecuciones recientes registradas por CDCI." },
+    Actividad: { title: "Actividad", subtitle: "Cambios auditables de los proyectos donde puedes consultar el historial." },
     Ajustes: { title: "Ajustes", subtitle: "Configura la conexión con tu backend Spring Boot." },
   };
 
@@ -161,7 +162,6 @@ export default function Home() {
   }
 
   const avatar = user?.fullName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
-  const pageRuns = section === "Actividad" ? filteredRuns.slice(0, 15) : filteredRuns;
   const successRate = dashboard?.successRate30Days ?? 0;
   const duration = dashboard?.medianDurationMillis30Days ?? null;
 
@@ -236,7 +236,7 @@ export default function Home() {
 
         {section === "Despliegues" && <article className="panel environments-panel"><div className="panel-heading"><div><h2>Despliegues recientes</h2><p>Publicaciones y aprobaciones en tus proyectos visibles</p></div><button className="secondary-button" onClick={() => void refreshDashboard()} disabled={refreshing}>{refreshing ? "Actualizando…" : "Actualizar"}</button></div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando despliegues…</div> : dashboard?.recentDeployments.length ? <div className="dashboard-deployments">{dashboard.recentDeployments.map((deployment) => <Link className="dashboard-deployment-row" key={deployment.id} href={`/projects/${deployment.projectId}`}><span className={`dashboard-deployment-mark status-${deployment.status.toLowerCase()}`}>⇧</span><span className="dashboard-deployment-copy"><strong>{deployment.pipelineName} <i>{deployment.environmentName}</i></strong><small>{deployment.projectName} · {deployment.repositoryName} · {deployment.sourceCommitSha.slice(0, 12)}</small></span><span className={`dashboard-deployment-status status-${deployment.status.toLowerCase()}`}>{deploymentStatusLabel(deployment.status)}</span><span className="row-arrow"><Icon name="arrow" size={16} /></span></Link>)}</div> : <div className="dashboard-empty"><strong>Aún no hay despliegues</strong><p>Los despliegues registrados en GitHub aparecerán aquí.</p><Link href="/projects" className="secondary-button">Abrir proyectos</Link></div>}</article>}
 
-        {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Actividad reciente</h2><p>Runs de tus proyectos visibles</p></div><button className="secondary-button" onClick={() => void refreshDashboard()} disabled={refreshing}>{refreshing ? "Actualizando…" : "Actualizar"}</button></div><div className="activity-date">{todayLabel}</div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando actividad…</div> : pageRuns.length ? pageRuns.map((run) => <div className="activity-item" key={run.id}><span className={"activity-icon " + activityTone(run.status)}>{run.status === "SUCCEEDED" ? "✓" : run.status === "FAILED" || run.status === "CANCELLED" ? "!" : "↗"}</span><span className="activity-copy"><strong>{run.pipelineName} · {statusFor(run.status)}</strong><small>{run.projectName} · {run.repositoryName} · {run.branchName} · por {run.requestedBy}</small></span><span className="activity-time">{relativeTime(run.requestedAt)}</span></div>) : <div className="dashboard-empty"><strong>No hay actividad que mostrar</strong><p>Las ejecuciones de los proyectos visibles aparecerán aquí.</p></div>}</article>}
+        {section === "Actividad" && <article className="panel activity-panel"><div className="panel-heading"><div><h2>Registro de actividad</h2><p>Hasta 50 cambios auditables en proyectos autorizados</p></div><div className="activity-panel-actions"><label className="filter-select" htmlFor="activity-category-filter">Tipo<select id="activity-category-filter" value={activityCategory} onChange={(event) => setActivityCategory(event.target.value as "ALL" | ActivityCategory)}><option value="ALL">Todos</option><option value="PROJECT">Proyecto</option><option value="ACCESS">Accesos</option><option value="PIPELINE">Pipelines</option><option value="DEPLOYMENT">Despliegues</option><option value="SECRET">Secretos</option></select></label><button className="secondary-button" onClick={() => void refreshDashboard()} disabled={refreshing}>{refreshing ? "Actualizando…" : "Actualizar"}</button></div></div><div className="activity-date">{todayLabel}</div>{loading ? <div className="projects-state"><span className="projects-spinner" /> Cargando actividad…</div> : filteredActivity.length ? filteredActivity.map((item) => <Link className="activity-item dashboard-activity-item" key={item.id} href={`/projects/${item.projectId}`}><span className={`activity-icon activity-${item.category.toLowerCase()}`} aria-hidden="true">{item.category === "DEPLOYMENT" ? "⇧" : item.category === "PIPELINE" ? "⌘" : item.category === "ACCESS" ? "♧" : item.category === "SECRET" ? "◇" : "•"}</span><span className="activity-copy"><strong>{item.summary}</strong><small>{item.projectName} · {item.category === "ACCESS" ? "Acceso" : item.category === "PIPELINE" ? "Pipeline" : item.category === "DEPLOYMENT" ? "Despliegue" : item.category === "SECRET" ? "Secreto" : "Proyecto"} · por {item.actorEmail}</small></span><span className="activity-time">{relativeTime(item.createdAt)}</span></Link>) : <div className="dashboard-empty"><strong>No hay actividad que mostrar</strong><p>{activityCategory !== "ALL" || query ? "No hay eventos que coincidan con estos filtros." : "El registro aparecerá cuando alguien realice cambios en los proyectos con acceso de auditoría."}</p></div>}</article>}
 
         {section === "Ajustes" && <><div className="settings-layout"><article className="panel settings-panel"><div className="panel-heading"><div><h2>Conexión con el backend</h2><p>Dirección de la API Spring Boot.</p></div><span className="connection-badge"><i /> Sesión protegida</span></div><label className="settings-label" htmlFor="api-url">URL base de la API</label><div className="api-url-input"><span>⌘</span><input id="api-url" type="url" value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} /></div><p className="settings-help">La URL se guarda en este navegador y también puedes configurarla en <code>.env.local</code> como <code>NEXT_PUBLIC_API_URL</code>. Valor actual por defecto: <code>{API_BASE_URL}</code>.</p><div className="settings-divider" /><div className="settings-info"><span className="info-icon">i</span><p><strong>Datos con acceso controlado</strong><br />El dashboard solo recibe proyectos autorizados por la sesión y muestra ejecuciones persistidas en CDCI.</p></div><div className="settings-footer"><span>Configuración local del frontend</span><button className="primary-button" onClick={() => { const value = apiUrl.trim().replace(/\/+$/, ""); setApiUrl(value); window.localStorage.setItem("cdci.apiBaseUrl", value); showNotice("URL de la API guardada en este navegador."); void refreshDashboard(); }}>Guardar cambios</button></div></article><article className="panel integration-panel"><div className="integration-mark">⌘</div><h2>GitHub</h2><p>GitHub es el proveedor de repositorios configurado para esta instalación.</p><Link className="secondary-button" href="/projects">Configurar integración <Icon name="arrow" size={14} /></Link></article></div><ChangePasswordForm /></>}
 

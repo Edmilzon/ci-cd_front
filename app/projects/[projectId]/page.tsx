@@ -7,6 +7,7 @@ import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
 import ProjectSecretsPanel from "./secrets-panel";
 import ProjectDeploymentsPanel from "./deployments-panel";
+import ProjectActivityPanel from "./activity-panel";
 import { addProjectMember, addProjectRepository, archiveProject, beginGitHubConnection, disconnectGitHub, getGitHubConnection, getGitHubRepositories, getProject, getProjectMembers, getProjectRepositories, removeProjectMember, removeProjectRepository, updateProject, updateProjectMember, type GitHubConnection, type GitHubRepository, type GitHubRepositoryPage, type Project, type ProjectMember, type ProjectRepository, type ProjectRole } from "@/src/lib/project-api";
 
 const accessNames: Record<string, string> = { OWNER: "Propietario", MAINTAINER: "Mantenedor", DEVELOPER: "Desarrollador", VIEWER: "Lector", ADMIN: "Administrador" };
@@ -136,6 +137,8 @@ export default function ProjectDetailPage() {
       {project && <Link className="project-pipelines-link" href={`/projects/${project.id}/pipelines`}><span className="section-icon">⌘</span><span><strong>Configurar pipelines</strong><small>Define YAML, valida cambios y consulta el historial de versiones.</small></span><span className="project-card-arrow">↗</span></Link>}
 
       {project && <ProjectDeploymentsPanel projectId={project.id} canManage={project.canManage} />}
+
+      {project?.canReadActivity && <ProjectActivityPanel projectId={project.id} />}
 
       {project?.canManage && <ProjectSecretsPanel projectId={project.id} />}
 

@@ -219,3 +219,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dashboard-deployment-status.status-waiting_approval, .dashboard-deployment-mark.status-waiting_approval { border-color: #f0e6cb; background: #fffcf4; color: #9a7d3f; }
 .dashboard-deployment-status.status-in_progress, .dashboard-deployment-status.status-approved, .dashboard-deployment-mark.status-in_progress, .dashboard-deployment-mark.status-approved { border-color: #e2e5fa; background: #f8f8ff; color: #686db8; }
 @media (max-width: 560px) { .dashboard-deployment-row { gap: 7px; padding: 10px 8px; }.dashboard-deployment-status { font-size: 6px; }.dashboard-deployment-copy small { max-width: 185px; } }
+.activity-panel-actions { display: flex; align-items: center; gap: 10px; }
+.activity-panel-actions .filter-select { gap: 7px; }
+.activity-panel-actions .filter-select select { min-width: 108px; }
+.dashboard-activity-item { color: inherit; text-decoration: none; }
+.dashboard-activity-item:hover { background: #fbfaff; }
+.activity-icon.activity-project { background: #f1eeff; color: #7059d8; }
+.activity-icon.activity-access { background: #edf7f3; color: #438a70; }
+.activity-icon.activity-pipeline { background: #edf4ff; color: #4e79b5; }
+.activity-icon.activity-deployment { background: #fffbef; color: #a17a32; }
+.activity-icon.activity-secret { background: #fff2f0; color: #b65e5a; }
+@media (max-width: 560px) { .activity-panel-actions { gap: 6px; }.activity-panel-actions .filter-select { display: grid; gap: 2px; }.activity-panel-actions .filter-select select { min-width: 90px; } }

@@ -8,6 +8,7 @@ export type Project = {
   accessLevel: string;
   canManage: boolean;
   canArchive: boolean;
+  canReadActivity: boolean;
   repositoryCount: number;
   memberCount: number;
   createdAt: string;
@@ -129,6 +130,20 @@ export type DashboardDeployment = {
   requestedAt: string;
   githubHtmlUrl: string | null;
 };
+export type ActivityCategory = "PROJECT" | "ACCESS" | "PIPELINE" | "DEPLOYMENT" | "SECRET";
+export type ProjectActivity = {
+  id: string;
+  projectId: string;
+  actorEmail: string;
+  action: string;
+  category: ActivityCategory;
+  targetType: string;
+  targetId: string;
+  summary: string;
+  createdAt: string;
+};
+export type ProjectActivityPage = { content: ProjectActivity[]; page: number; size: number; totalElements: number; totalPages: number };
+export type DashboardActivity = ProjectActivity & { projectName: string };
 export type DashboardDailyRuns = { day: string; succeeded: number; failed: number; active: number };
 export type DashboardSummary = {
   projectCount: number;
@@ -140,12 +155,16 @@ export type DashboardSummary = {
   dailyRuns: DashboardDailyRuns[];
   recentRuns: DashboardRun[];
   recentDeployments: DashboardDeployment[];
+  recentActivity: DashboardActivity[];
 };
 
 export function getDashboard() { return apiFetch<DashboardSummary>("/api/dashboard"); }
 
 export function getProjects() { return apiFetch<Project[]>("/api/projects"); }
 export function getProject(id: string) { return apiFetch<Project>(`/api/projects/${id}`); }
+export function getProjectActivity(id: string, category: "ALL" | ActivityCategory = "ALL", page = 0, size = 25) {
+  return apiFetch<ProjectActivityPage>(`/api/projects/${id}/activity?category=${category}&page=${page}&size=${size}`);
+}
 export function createProject(input: { name: string; slug?: string; description: string }) {
   return apiFetch<Project>("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
 }
