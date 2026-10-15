@@ -238,6 +238,7 @@
 .run-status-badge.status-succeeded { border-color: #dcebe2; background: #f7fcf8; color: #508463; }
 .run-status-badge.status-failed { border-color: #f0dddd; background: #fff8f8; color: #b65e5a; }
 .pipeline-run-log-box { margin-top: 12px; border: 1px solid #e9ebef; border-radius: 7px; overflow: hidden; }
+.pipeline-run-failure { margin-top: 9px; padding: 9px 10px; border: 1px solid #f0dddd; border-radius: 6px; background: #fff8f8; color: #a64d49; font-size: 8px; line-height: 1.5; overflow-wrap: anywhere; }
 .pipeline-run-log-heading { padding: 9px 10px; border-bottom: 1px solid #eef0f3; background: #fbfcfd; }
 .pipeline-run-log-list { max-height: 210px; overflow: auto; background: #20242c; }
 .pipeline-run-log-line { display: grid; grid-template-columns: 54px 48px minmax(0, 1fr); align-items: start; gap: 8px; padding: 7px 9px; border-bottom: 1px solid rgb(255 255 255 / 5%); }
