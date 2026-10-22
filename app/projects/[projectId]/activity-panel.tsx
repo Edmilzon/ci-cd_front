@@ -12,10 +12,11 @@ const categories: { value: "ALL" | ActivityCategory; label: string }[] = [
   { value: "PIPELINE", label: "Pipelines" },
   { value: "DEPLOYMENT", label: "Despliegues" },
   { value: "SECRET", label: "Secretos" },
+  { value: "SERVER", label: "Servidores" },
 ];
 
 const categoryNames: Record<ActivityCategory, string> = {
-  PROJECT: "Proyecto", ACCESS: "Acceso", PIPELINE: "Pipeline", DEPLOYMENT: "Despliegue", SECRET: "Secreto",
+  PROJECT: "Proyecto", ACCESS: "Acceso", PIPELINE: "Pipeline", DEPLOYMENT: "Despliegue", SECRET: "Secreto", SERVER: "Servidor",
 };
 
 function activityError(error: unknown) {
@@ -68,7 +69,7 @@ export default function ProjectActivityPanel({ projectId }: { projectId: string 
       : !error && result?.content.length ? <>
         <div className="project-activity-list" aria-live="polite">
           {result.content.map((item) => <article className="project-activity-row" key={item.id}>
-            <span className={`project-activity-mark category-${item.category.toLowerCase()}`} aria-hidden="true">{item.category === "DEPLOYMENT" ? "⇧" : item.category === "PIPELINE" ? "⌘" : item.category === "ACCESS" ? "♧" : item.category === "SECRET" ? "◇" : "•"}</span>
+            <span className={`project-activity-mark category-${item.category.toLowerCase()}`} aria-hidden="true">{item.category === "DEPLOYMENT" ? "⇧" : item.category === "PIPELINE" ? "⌘" : item.category === "ACCESS" ? "♧" : item.category === "SECRET" ? "◇" : item.category === "SERVER" ? "▣" : "•"}</span>
             <div className="project-activity-copy"><strong>{item.summary}</strong><span>{item.actorEmail} <i>·</i> {categoryNames[item.category]}</span></div>
             <time dateTime={item.createdAt}>{dateTime(item.createdAt)}</time>
           </article>)}

@@ -36,6 +36,24 @@ export type ProjectRepository = {
 };
 
 export type ProjectSecret = { name: string; updatedBy: string; updatedAt: string };
+export type ProjectServerStatus = "UNKNOWN" | "CONNECTED" | "FAILED";
+export type ProjectServer = {
+  id: string;
+  name: string;
+  host: string;
+  port: number;
+  username: string;
+  lastStatus: ProjectServerStatus;
+  lastConnectedAt: string | null;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
+export type ProjectServerInput = { name: string; host: string; port: number; username: string; password: string };
+export type ProjectServerUpdateInput = Omit<ProjectServerInput, "password"> & { password?: string };
+export type ProjectServerConnection = { status: "CONNECTED"; message: string; osInfo: string; latencyMs: number; server: ProjectServer };
+export type ProjectServerCommandResult = { command: string; output: string; errorOutput: string; exitStatus: number; durationMillis: number };
 export type ProjectDeployment = {
   id: string;
   runId: string;
@@ -132,7 +150,7 @@ export type DashboardDeployment = {
   requestedAt: string;
   githubHtmlUrl: string | null;
 };
-export type ActivityCategory = "PROJECT" | "ACCESS" | "PIPELINE" | "DEPLOYMENT" | "SECRET";
+export type ActivityCategory = "PROJECT" | "ACCESS" | "PIPELINE" | "DEPLOYMENT" | "SECRET" | "SERVER";
 export type ProjectActivity = {
   id: string;
   projectId: string;
@@ -198,6 +216,22 @@ export function saveProjectSecret(id: string, name: string, value: string) {
 }
 export function deleteProjectSecret(id: string, name: string) {
   return apiFetch<void>(`/api/projects/${id}/secrets/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+export function getProjectServers(id: string) { return apiFetch<ProjectServer[]>(`/api/projects/${id}/servers`); }
+export function createProjectServer(id: string, input: ProjectServerInput) {
+  return apiFetch<ProjectServer>(`/api/projects/${id}/servers`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export function updateProjectServer(id: string, serverId: string, input: ProjectServerUpdateInput) {
+  return apiFetch<ProjectServer>(`/api/projects/${id}/servers/${serverId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export function deleteProjectServer(id: string, serverId: string) {
+  return apiFetch<void>(`/api/projects/${id}/servers/${serverId}`, { method: "DELETE" });
+}
+export function testProjectServer(id: string, serverId: string) {
+  return apiFetch<ProjectServerConnection>(`/api/projects/${id}/servers/${serverId}/test`, { method: "POST" });
+}
+export function executeProjectServerCommand(id: string, serverId: string, command: string) {
+  return apiFetch<ProjectServerCommandResult>(`/api/projects/${id}/servers/${serverId}/commands`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ command }) });
 }
 export function getProjectDeployments(id: string) { return apiFetch<ProjectDeployment[]>(`/api/projects/${id}/deployments`); }
 export function approveProjectDeployment(projectId: string, deploymentId: string) {

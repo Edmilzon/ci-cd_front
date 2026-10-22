@@ -7,6 +7,7 @@ import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { deferEffect } from "@/src/lib/defer-effect";
 import ProjectSecretsPanel from "./secrets-panel";
+import ProjectServersPanel from "./servers-panel";
 import ProjectDeploymentsPanel from "./deployments-panel";
 import ProjectActivityPanel from "./activity-panel";
 import { addProjectMember, addProjectRepository, archiveProject, beginGitHubConnection, checkProjectRepositoryReadiness, disconnectGitHub, getGitHubConnection, getGitHubRepositories, getProject, getProjectMembers, getProjectRepositories, removeProjectMember, removeProjectRepository, updateProject, updateProjectMember, type GitHubConnection, type GitHubRepository, type GitHubRepositoryPage, type Project, type ProjectMember, type ProjectRepository, type RepositoryReadiness, type ProjectRole } from "@/src/lib/project-api";
@@ -146,7 +147,7 @@ export default function ProjectDetailPage() {
 
     <div className="projects-content project-detail-content">
       <div className="project-back"><Link href="/projects">← Todos los proyectos</Link><span>{project && dateLabel(project.createdAt)}</span></div>
-      <div className="project-detail-heading"><div className="project-title-mark">{project?.name.trim().slice(0, 1).toUpperCase() ?? "◇"}</div><div className="project-title-copy"><span className="projects-eyebrow">PROYECTO · {project?.slug}</span><h1>{project?.name ?? "Proyecto no disponible"}</h1><p>{project?.description || "Agrega una descripción para que el equipo conozca el propósito."}</p></div><div className="project-heading-actions"><span className="project-role-badge">{accessNames[project?.accessLevel ?? ""] ?? project?.accessLevel}</span>{project?.canManage && <button className="projects-secondary" onClick={() => setEditOpen(true)}>Editar proyecto</button>}{project?.canArchive && <button className="project-danger-outline" onClick={() => void archive()} disabled={busy}>Archivar</button>}</div></div>
+      <div className="project-detail-heading"><div className="project-title-mark">{project?.name.trim().slice(0, 1).toUpperCase() ?? "◇"}</div><div className="project-title-copy"><span className="projects-eyebrow">PROYECTO · {project?.slug}</span><h1>{project?.name ?? "Proyecto no disponible"}</h1><p>{project?.description || "Agrega una descripción para que el equipo conozca el propósito."}</p></div><div className="project-heading-actions"><span className="project-role-badge">{accessNames[project?.accessLevel ?? ""] ?? project?.accessLevel}</span>{project?.canManage && <button className="projects-secondary" onClick={() => document.getElementById("project-servers")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Servidores</button>}{project?.canManage && <button className="projects-secondary" onClick={() => setEditOpen(true)}>Editar proyecto</button>}{project?.canArchive && <button className="project-danger-outline" onClick={() => void archive()} disabled={busy}>Archivar</button>}</div></div>
 
       {error && <div className="projects-alert" role="alert"><span>!</span>{error}<button onClick={() => setError("")} aria-label="Cerrar error">×</button></div>}
       {notice && <div className="projects-success" role="status">✓ {notice}<button onClick={() => setNotice("")} aria-label="Cerrar aviso">×</button></div>}
@@ -156,6 +157,8 @@ export default function ProjectDetailPage() {
       {project && <Link className="project-pipelines-link" href={`/projects/${project.id}/pipelines`}><span className="section-icon">⌘</span><span><strong>Configurar pipelines</strong><small>Define YAML, valida cambios y consulta el historial de versiones.</small></span><span className="project-card-arrow">↗</span></Link>}
 
       {project && <ProjectDeploymentsPanel projectId={project.id} canManage={project.canManage} />}
+
+      {project?.canManage && <ProjectServersPanel projectId={project.id} />}
 
       {project?.canReadActivity && <ProjectActivityPanel projectId={project.id} />}
 

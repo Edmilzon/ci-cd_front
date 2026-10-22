@@ -214,3 +214,38 @@ test("pipeline and production deployment calls match the backend routes", async 
   assert.equal(JSON.parse(calls[1].options.body).branchName, "main");
   assert.equal(calls[2].options.method, "POST");
 });
+
+test("project server calls match the backend SSH routes", async () => {
+  const calls = [];
+  const apiFetch = async (path, options = {}) => {
+    calls.push({ path, options });
+    return {};
+  };
+  const projectApi = await loadTypeScriptModule("../src/lib/project-api.ts", {
+    modules: { "@/src/lib/api": { apiFetch } },
+  });
+
+  await projectApi.getProjectServers("project-7");
+  await projectApi.createProjectServer("project-7", { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", password: "ssh-secret" });
+  await projectApi.updateProjectServer("project-7", "server-1", { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy" });
+  await projectApi.testProjectServer("project-7", "server-1");
+  await projectApi.executeProjectServerCommand("project-7", "server-1", "uname -a");
+  await projectApi.deleteProjectServer("project-7", "server-1");
+
+  assert.deepEqual(calls.map(({ path }) => path), [
+    "/api/projects/project-7/servers",
+    "/api/projects/project-7/servers",
+    "/api/projects/project-7/servers/server-1",
+    "/api/projects/project-7/servers/server-1/test",
+    "/api/projects/project-7/servers/server-1/commands",
+    "/api/projects/project-7/servers/server-1",
+  ]);
+  assert.equal(calls[0].options.method, undefined);
+  assert.equal(calls[1].options.method, "POST");
+  assert.deepEqual(JSON.parse(calls[1].options.body), { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", password: "ssh-secret" });
+  assert.equal(calls[2].options.method, "PUT");
+  assert.deepEqual(JSON.parse(calls[2].options.body), { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy" });
+  assert.equal(calls[3].options.method, "POST");
+  assert.deepEqual(JSON.parse(calls[4].options.body), { command: "uname -a" });
+  assert.equal(calls[5].options.method, "DELETE");
+});
