@@ -51,6 +51,9 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   });
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new Event("cdci:unauthorized"));
+    }
     const body = (await response.json().catch(() => null)) as { code?: string; message?: string; fields?: Record<string, string> } | null;
     throw new ApiError(response.status, body?.message ?? `La API respondió ${response.status}.`, body?.code, body?.fields);
   }
@@ -71,10 +74,48 @@ export type AuthUser = {
 
 export async function login(email: string, password: string) {
   const body = new URLSearchParams({ email, password });
-  return apiFetch<{ authenticated: boolean }>("/api/auth/login", {
+  return apiFetch<{ authenticated: boolean; mfaRequired?: boolean; mfaSetupRequired?: boolean }>("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
+  });
+}
+
+export async function completeMfaLogin(code: string) {
+  return apiFetch<{ authenticated: boolean }>("/api/auth/mfa/login", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }),
+  });
+}
+
+export type MfaStatus = { available: boolean; enabled: boolean; recoveryCodesRemaining: number };
+export type MfaSetup = { secret: string; otpauthUri: string; expiresAt: string };
+export type MfaRecoveryCodes = { enabled: boolean; recoveryCodes: string[] };
+
+export async function getMfaStatus() {
+  return apiFetch<MfaStatus>("/api/auth/mfa/status");
+}
+
+export async function startMfaSetup(currentPassword: string) {
+  return apiFetch<MfaSetup>("/api/auth/mfa/setup", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword }),
+  });
+}
+
+export async function confirmMfaSetup(code: string) {
+  return apiFetch<MfaRecoveryCodes>("/api/auth/mfa/confirm", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }),
+  });
+}
+
+export async function regenerateMfaRecoveryCodes(currentPassword: string, code: string) {
+  return apiFetch<MfaRecoveryCodes>("/api/auth/mfa/recovery-codes", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword, code }),
+  });
+}
+
+export async function disableMfa(currentPassword: string, code: string) {
+  return apiFetch<void>("/api/auth/mfa/disable", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword, code }),
   });
 }
 

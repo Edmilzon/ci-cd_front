@@ -42,6 +42,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const handleUnauthorized = () => {
+      setUser(null);
+      setReady(true);
+      router.replace("/login");
+    };
+    window.addEventListener("cdci:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("cdci:unauthorized", handleUnauthorized);
+  }, [router]);
+
+  useEffect(() => {
     if (!ready) return;
     const isPublic = publicPaths.has(pathname);
     if (!user && !isPublic) router.replace("/login");

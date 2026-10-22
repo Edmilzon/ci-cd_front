@@ -7,7 +7,7 @@ import { test } from "node:test";
 const require = createRequire(import.meta.url);
 const typescript = require("typescript");
 
-async function loadTypeScriptModule(relativePath, { fetchImpl, modules = {} } = {}) {
+async function loadTypeScriptModule(relativePath, { fetchImpl, modules = {}, onWindowEvent = () => {} } = {}) {
   const source = await readFile(new URL(relativePath, import.meta.url), "utf8");
   const compiled = typescript.transpileModule(source, {
     compilerOptions: {
@@ -24,9 +24,10 @@ async function loadTypeScriptModule(relativePath, { fetchImpl, modules = {} } = 
       return require(name);
     },
     process: { env: { NEXT_PUBLIC_API_URL: "https://api.cdci.test" } },
-    window: { localStorage: { getItem: () => null } },
+    window: { localStorage: { getItem: () => null }, dispatchEvent: onWindowEvent },
     fetch: fetchImpl,
     Headers,
+    Event,
     URLSearchParams,
   };
   runInNewContext(compiled, context, { filename: relativePath });
@@ -100,6 +101,17 @@ test("API client maps structured authorization errors and 204 responses", async 
   assert.equal(await api.apiFetch("/api/auth/logout", { method: "POST" }), undefined);
 });
 
+test("expired sessions notify the authentication provider after an API 401", async () => {
+  const events = [];
+  const fetchImpl = async (url) => url.endsWith("/api/auth/csrf")
+    ? jsonResponse(200, { token: "csrf-expired" })
+    : jsonResponse(401, { code: "UNAUTHENTICATED", message: "Inicia sesión nuevamente." });
+  const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl, onWindowEvent: (event) => events.push(event.type) });
+
+  await assert.rejects(api.getCurrentUser(), { status: 401 });
+  assert.deepEqual(events, ["cdci:unauthorized"]);
+});
+
 test("password recovery uses the public status and CSRF-protected reset routes", async () => {
   const calls = [];
   const fetchImpl = async (url, init) => {
@@ -144,6 +156,38 @@ test("email verification uses CSRF-protected resend and confirm routes", async (
   assert.equal(JSON.parse(calls[1].init.body).email, "dev@cdci.test");
   assert.equal(calls[3].url, "https://api.cdci.test/api/auth/email-verification/confirm");
   assert.equal(JSON.parse(calls[3].init.body).token, "opaque-verification-token");
+});
+
+test("MFA login, enrollment, recovery rotation, and disable use protected API routes", async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    if (url.endsWith("/api/auth/csrf")) return jsonResponse(200, { token: "csrf-mfa" });
+    if (url.endsWith("/api/auth/login")) return jsonResponse(200, { authenticated: false, mfaRequired: true, mfaSetupRequired: true });
+    if (url.endsWith("/api/auth/mfa/login")) return jsonResponse(200, { authenticated: true });
+    if (url.endsWith("/api/auth/mfa/status")) return jsonResponse(200, { available: true, enabled: true, recoveryCodesRemaining: 10 });
+    if (url.endsWith("/api/auth/mfa/setup")) return jsonResponse(200, { secret: "BASE32SECRET", otpauthUri: "otpauth://totp/CDCI", expiresAt: "2026-10-22T12:00:00Z" });
+    if (url.endsWith("/api/auth/mfa/confirm") || url.endsWith("/api/auth/mfa/recovery-codes")) return jsonResponse(200, { enabled: true, recoveryCodes: ["A1B2-C3D4"] });
+    if (url.endsWith("/api/auth/mfa/disable")) return { ok: true, status: 204 };
+    throw new Error(`Unexpected request: ${url}`);
+  };
+  const api = await loadTypeScriptModule("../src/lib/api.ts", { fetchImpl });
+
+  assert.deepEqual(await api.login("dev@cdci.test", "long-password"), { authenticated: false, mfaRequired: true, mfaSetupRequired: true });
+  assert.deepEqual(await api.completeMfaLogin("123456"), { authenticated: true });
+  assert.deepEqual(await api.getMfaStatus(), { available: true, enabled: true, recoveryCodesRemaining: 10 });
+  assert.equal((await api.startMfaSetup("long-password")).secret, "BASE32SECRET");
+  assert.deepEqual(await api.confirmMfaSetup("123456"), { enabled: true, recoveryCodes: ["A1B2-C3D4"] });
+  assert.deepEqual(await api.regenerateMfaRecoveryCodes("long-password", "123456"), { enabled: true, recoveryCodes: ["A1B2-C3D4"] });
+  assert.equal(await api.disableMfa("long-password", "123456"), undefined);
+
+  const mfaMutations = calls.filter(({ url }) => url.includes("/api/auth/mfa/") && !url.endsWith("/status"));
+  assert.equal(mfaMutations.length, 5);
+  for (const { init } of mfaMutations) assert.equal(init.headers.get("X-XSRF-TOKEN"), "csrf-mfa");
+  assert.deepEqual(mfaMutations.map(({ url }) => new URL(url).pathname), [
+    "/api/auth/mfa/login", "/api/auth/mfa/setup", "/api/auth/mfa/confirm",
+    "/api/auth/mfa/recovery-codes", "/api/auth/mfa/disable",
+  ]);
 });
 
 test("pipeline and production deployment calls match the backend routes", async () => {
