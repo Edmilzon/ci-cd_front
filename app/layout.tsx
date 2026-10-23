@@ -4,6 +4,7 @@ import "./globals.css";
 import "./auth.css";
 import "./admin.css";
 import "./projects.css";
+import "./liquid-glass.css";
 import { AuthProvider } from "@/src/auth/AuthProvider";
 
 export const metadata: Metadata = {

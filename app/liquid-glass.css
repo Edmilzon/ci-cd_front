@@ -1,0 +1,716 @@
+:root {
+  --ink: #192238;
+  --text-secondary: #526078;
+  --muted: #74819a;
+  --line: rgb(255 255 255 / 72%);
+  --canvas: #edf1fb;
+  --panel: rgb(255 255 255 / 58%);
+  --purple: #6d5ae8;
+  --purple-strong: #5947d0;
+  --purple-soft: rgb(116 96 235 / 10%);
+  --green: #168b79;
+  --focus-ring: #6958df;
+  --focus-halo: rgb(117 99 232 / 17%);
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --motion-fast: 190ms;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #edf1fb;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 8% 8%, rgb(168 151 255 / 25%), transparent 32%),
+    radial-gradient(ellipse at 92% 9%, rgb(126 218 224 / 22%), transparent 29%),
+    radial-gradient(ellipse at 78% 91%, rgb(255 203 170 / 17%), transparent 31%),
+    linear-gradient(135deg, #f5f6fc 0%, #eaf0fb 52%, #f4f5fc 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: -12%;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(ellipse at 20% 34%, rgb(255 255 255 / 48%), transparent 27%),
+    radial-gradient(ellipse at 77% 43%, rgb(255 255 255 / 31%), transparent 25%),
+    radial-gradient(ellipse at 52% 80%, rgb(169 188 255 / 12%), transparent 30%);
+  filter: blur(34px);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button,
+a,
+.project-card,
+.nav-item,
+.project-nav-link {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell,
+.main-panel,
+.projects-shell,
+.admin-page {
+  background: transparent;
+}
+
+.sidebar {
+  border-right: 1px solid rgb(255 255 255 / 76%);
+  background: rgb(249 251 255 / 66%);
+  box-shadow: 1px 0 0 rgb(115 129 172 / 5%), 18px 0 50px rgb(72 82 129 / 5%);
+  backdrop-filter: blur(30px) saturate(165%);
+  -webkit-backdrop-filter: blur(30px) saturate(165%);
+}
+
+.workspace-switcher,
+.topbar,
+.projects-topbar,
+.admin-topbar {
+  border-color: rgb(255 255 255 / 80%);
+  background: rgb(249 251 255 / 66%);
+  box-shadow: 0 8px 28px rgb(60 70 112 / 4%);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+}
+
+.workspace-switcher {
+  border-radius: 15px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 94%), 0 9px 24px rgb(58 67 110 / 5%);
+}
+
+.nav-item,
+.project-nav button,
+.project-nav-link {
+  border-radius: 11px;
+  transition: background var(--motion-fast) ease, color var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+
+.nav-item:hover,
+.project-nav button:hover,
+.project-nav-link:hover {
+  background: rgb(255 255 255 / 64%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 85%);
+}
+
+.nav-item.active {
+  border: 1px solid rgb(255 255 255 / 90%);
+  background: linear-gradient(115deg, rgb(139 122 246 / 15%), rgb(110 193 221 / 10%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 5px 16px rgb(94 78 180 / 7%);
+}
+
+.brand-symbol,
+.projects-brand .brand-symbol {
+  background: linear-gradient(145deg, #8b79f2, #6252d5 64%, #5364d9);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%), 0 5px 14px rgb(89 72 208 / 25%);
+}
+
+.brand-tag,
+.upgrade-card,
+.workspace-avatar {
+  border: 1px solid rgb(255 255 255 / 90%);
+  background: linear-gradient(145deg, rgb(255 255 255 / 76%), rgb(229 226 255 / 54%));
+  box-shadow: inset 0 1px 0 #fff, 0 8px 20px rgb(82 77 151 / 7%);
+}
+
+.upgrade-card {
+  border-radius: 17px;
+}
+
+.topbar,
+.projects-topbar,
+.admin-topbar {
+  border-bottom-color: rgb(255 255 255 / 76%);
+}
+
+.search-box,
+.projects-search,
+.repo-picker-search,
+.filter-select select,
+.panel-heading select,
+.project-activity-filter select {
+  border-color: rgb(255 255 255 / 92%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 58%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 4px 12px rgb(73 83 125 / 4%);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+.search-box input,
+.projects-search input,
+.repo-picker-search input {
+  color: #35415a;
+}
+
+.search-box kbd {
+  border-color: rgb(255 255 255 / 88%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 54%);
+}
+
+.stat-card,
+.panel,
+.project-card,
+.project-section-card,
+.project-stats article,
+.github-banner,
+.project-github-callout,
+.server-form,
+.server-security-note,
+.admin-panel,
+.admin-count,
+.password-panel,
+.mfa-actions .mfa-form {
+  border: 1px solid rgb(255 255 255 / 84%);
+  background: rgb(255 255 255 / 57%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), 0 12px 34px rgb(62 76 125 / 8%);
+  backdrop-filter: blur(24px) saturate(165%);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+}
+
+.stat-card,
+.panel,
+.project-section-card,
+.admin-panel,
+.password-panel {
+  border-radius: 21px;
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before,
+.project-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 100%), transparent);
+}
+
+.stat-icon,
+.project-card-icon,
+.project-title-mark,
+.section-icon,
+.project-activity-mark,
+.server-avatar,
+.admin-avatar,
+.role-list-icon {
+  border: 1px solid rgb(255 255 255 / 92%);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 86%), rgb(225 225 255 / 59%));
+  box-shadow: inset 0 1px 0 #fff, 0 5px 13px rgb(83 86 151 / 7%);
+}
+
+.project-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 224px;
+  border-radius: 19px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), 0 13px 34px rgb(62 76 125 / 8%);
+}
+
+.project-card:hover {
+  border-color: rgb(178 171 246 / 78%);
+  background: rgb(255 255 255 / 72%);
+  box-shadow: inset 0 1px 0 #fff, 0 18px 42px rgb(80 74 153 / 14%);
+  transform: translateY(-4px);
+}
+
+.project-card-footer,
+.project-activity-row,
+.project-activity-footer,
+.linked-repository-group,
+.server-row,
+.admin-table td,
+.admin-pagination,
+.audit-event {
+  border-color: rgb(104 119 160 / 12%);
+}
+
+.project-access,
+.project-role-badge,
+.role-badge,
+.server-status,
+.deployment-status,
+.run-status-badge,
+.repo-visibility,
+.deployment-environment {
+  border-color: rgb(255 255 255 / 90%);
+  background: rgb(255 255 255 / 66%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%);
+}
+
+.primary-button,
+.projects-primary,
+.auth-submit,
+.admin-primary-button,
+.role-picker > button {
+  border: 1px solid rgb(255 255 255 / 34%);
+  border-radius: 13px;
+  background: linear-gradient(135deg, #8572f0 0%, #6958df 52%, #586bdc 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 34%), 0 8px 20px rgb(93 77 207 / 25%);
+  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, filter var(--motion-fast) ease;
+}
+
+.primary-button:hover,
+.projects-primary:hover,
+.auth-submit:hover:not(:disabled),
+.admin-primary-button:hover:not(:disabled),
+.role-picker > button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8f7ef4 0%, #6c5ce1 54%, #5b70e2 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 42%), 0 11px 24px rgb(93 77 207 / 29%);
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+}
+
+.secondary-button,
+.projects-secondary,
+.projects-account button,
+.project-danger-outline,
+.admin-search button,
+.admin-pagination button,
+.admin-secondary-link,
+.account-action,
+.project-close {
+  border-color: rgb(255 255 255 / 92%);
+  border-radius: 11px;
+  background: rgb(255 255 255 / 58%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 93%), 0 5px 14px rgb(66 78 124 / 5%);
+  backdrop-filter: blur(16px) saturate(165%);
+  -webkit-backdrop-filter: blur(16px) saturate(165%);
+}
+
+.secondary-button:hover,
+.projects-secondary:hover,
+.admin-search button:hover,
+.admin-pagination button:not(:disabled):hover,
+.admin-secondary-link:hover {
+  border-color: rgb(157 145 238 / 72%);
+  background: rgb(255 255 255 / 82%);
+  box-shadow: inset 0 1px 0 #fff, 0 7px 18px rgb(82 75 157 / 9%);
+}
+
+.projects-dark {
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #36405a, #232c44);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 17%), 0 8px 18px rgb(35 44 68 / 18%);
+}
+
+.projects-dark:hover {
+  background: linear-gradient(135deg, #414c69, #28324b);
+}
+
+.auth-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgb(172 157 255 / 36%), transparent 36%),
+    radial-gradient(ellipse at 85% 18%, rgb(118 214 224 / 32%), transparent 33%),
+    radial-gradient(ellipse at 72% 90%, rgb(255 200 167 / 28%), transparent 32%),
+    linear-gradient(135deg, #f7f7fd, #eaf0fb 54%, #f2f4fc);
+}
+
+.auth-page::before,
+.auth-page::after {
+  position: absolute;
+  z-index: -1;
+  width: min(45vw, 540px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-radius: 50%;
+  pointer-events: none;
+  content: "";
+  filter: blur(1px);
+}
+
+.auth-page::before {
+  top: -25%;
+  left: -18%;
+  background: radial-gradient(circle at 45% 45%, rgb(255 255 255 / 40%), rgb(137 121 238 / 12%) 38%, transparent 69%);
+  box-shadow: inset 0 0 70px rgb(255 255 255 / 25%), 0 0 80px rgb(142 123 245 / 12%);
+}
+
+.auth-page::after {
+  right: -15%;
+  bottom: -28%;
+  background: radial-gradient(circle at 40% 40%, rgb(255 255 255 / 55%), rgb(121 211 220 / 14%) 42%, transparent 70%);
+  box-shadow: inset 0 0 76px rgb(255 255 255 / 38%), 0 0 85px rgb(103 198 212 / 13%);
+}
+
+.auth-card {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  width: min(100%, 468px);
+  padding: 39px 42px 31px;
+  border: 1px solid rgb(255 255 255 / 88%);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 76%), rgb(255 255 255 / 47%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 98%), inset 0 -1px 0 rgb(255 255 255 / 46%), 0 28px 86px rgb(69 78 132 / 17%), 0 4px 14px rgb(76 82 130 / 7%);
+  backdrop-filter: blur(34px) saturate(180%);
+  -webkit-backdrop-filter: blur(34px) saturate(180%);
+}
+
+.auth-card::before {
+  position: absolute;
+  z-index: -1;
+  top: -115px;
+  right: -80px;
+  width: 245px;
+  height: 245px;
+  border: 1px solid rgb(255 255 255 / 76%);
+  border-radius: 50%;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle at 35% 36%, rgb(255 255 255 / 78%), rgb(165 152 247 / 22%) 43%, transparent 71%);
+  box-shadow: inset 0 0 30px rgb(255 255 255 / 52%), 0 6px 30px rgb(111 95 209 / 8%);
+}
+
+.auth-brand,
+.auth-eyebrow,
+.auth-card h1,
+.auth-description,
+.auth-form,
+.auth-switch,
+.auth-security,
+.auth-mfa-setup,
+.auth-recovery-codes,
+.verification-pending {
+  position: relative;
+}
+
+.auth-brand {
+  color: #202943;
+}
+
+.auth-eyebrow {
+  color: #7160d4;
+}
+
+.auth-card h1 {
+  color: #18243b;
+  font-size: 29px;
+  letter-spacing: -.055em;
+}
+
+.auth-description {
+  color: #68758d;
+}
+
+.auth-form label,
+.password-form label,
+.mfa-form label {
+  color: #45536b;
+}
+
+.auth-form input,
+.password-form input,
+.mfa-form input,
+.admin-search input,
+.admin-text-input,
+.create-role-form input,
+.project-modal input,
+.project-modal textarea,
+.invite-member-form input,
+.invite-member-form select,
+.server-form input {
+  border: 1px solid rgb(255 255 255 / 92%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 62%);
+  box-shadow: inset 0 1px 2px rgb(53 65 104 / 4%), 0 4px 13px rgb(70 83 128 / 4%);
+  color: #26334b;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.auth-form input:focus,
+.password-form input:focus,
+.mfa-form input:focus,
+.admin-search input:focus,
+.admin-text-input:focus,
+.create-role-form input:focus,
+.project-modal input:focus,
+.project-modal textarea:focus,
+.invite-member-form input:focus,
+.invite-member-form select:focus,
+.server-form input:focus {
+  border-color: rgb(122 105 226 / 72%);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgb(116 97 224 / 14%), inset 0 1px 2px rgb(53 65 104 / 3%);
+}
+
+.auth-submit {
+  min-height: 46px;
+  height: auto;
+  margin-top: 12px;
+  font-size: 12px;
+  letter-spacing: .01em;
+}
+
+.auth-security {
+  border-top-color: rgb(117 128 161 / 13%);
+  color: #75819a;
+}
+
+.auth-switch {
+  color: #66738b;
+}
+
+.auth-switch a,
+.auth-recovery a {
+  color: #6251d1;
+}
+
+.project-modal-backdrop {
+  background: rgb(41 48 78 / 26%);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+}
+
+.project-modal,
+.repo-picker-modal,
+.server-console,
+.role-picker {
+  border-color: rgb(255 255 255 / 88%);
+  border-radius: 22px;
+  background: rgb(249 251 255 / 82%);
+  box-shadow: inset 0 1px 0 #fff, 0 30px 90px rgb(34 42 75 / 22%);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+
+.project-modal-heading h2,
+.projects-heading h1,
+.project-title-copy h1,
+.admin-heading h1,
+.page-heading h1 {
+  color: #1b2740;
+}
+
+.projects-heading p,
+.project-title-copy p,
+.admin-heading > div > p:last-child,
+.page-heading p {
+  color: #68758e;
+}
+
+.projects-eyebrow,
+.admin-eyebrow,
+.eyebrow {
+  color: #7267b6;
+}
+
+.github-banner {
+  border-radius: 19px;
+  background: linear-gradient(112deg, rgb(255 255 255 / 73%), rgb(237 237 255 / 54%) 60%, rgb(221 247 247 / 51%));
+}
+
+.server-security-note {
+  border-radius: 15px;
+  background: linear-gradient(120deg, rgb(235 244 255 / 76%), rgb(239 238 255 / 58%));
+}
+
+.server-form {
+  border-radius: 18px;
+}
+
+.server-console-output,
+.pipeline-run-log-list {
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #182135, #101725 74%, #16202e);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 12px 30px rgb(28 36 58 / 12%);
+}
+
+.server-console-form {
+  border-color: rgb(255 255 255 / 88%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 58%);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.server-console-form input {
+  color: #26334b;
+}
+
+.admin-table th {
+  border-bottom-color: rgb(93 109 151 / 16%);
+  color: #68758d;
+}
+
+.admin-table tbody tr {
+  transition: background var(--motion-fast) ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgb(255 255 255 / 36%);
+}
+
+.role-list-item,
+.permission-group {
+  border-radius: 13px;
+}
+
+.role-list-item.selected {
+  border-color: rgb(255 255 255 / 92%);
+  background: linear-gradient(115deg, rgb(135 119 239 / 13%), rgb(125 202 219 / 11%));
+  box-shadow: inset 0 1px 0 #fff, 0 7px 19px rgb(76 74 148 / 8%);
+}
+
+.role-list-item:hover,
+.role-picker label:hover {
+  background: rgb(255 255 255 / 62%);
+}
+
+.permission-group {
+  border-color: rgb(255 255 255 / 86%);
+  background: rgb(255 255 255 / 38%);
+}
+
+.permission-option {
+  border-top-color: rgb(91 108 151 / 11%);
+}
+
+.project-section-empty,
+.projects-state,
+.projects-empty {
+  border-color: rgb(255 255 255 / 90%);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 39%);
+  color: #65728b;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.project-activity-copy strong,
+.linked-repo-copy > a,
+.linked-repo-copy > strong,
+.server-copy strong,
+.deployment-title > strong,
+.admin-person strong,
+.audit-event-copy strong {
+  color: #34415a;
+}
+
+.project-activity-copy span,
+.linked-repo-copy > span,
+.server-copy small,
+.deployment-meta,
+.admin-person small,
+.audit-event-copy small {
+  color: #71809a;
+}
+
+.server-actions .server-action {
+  border-radius: 10px;
+}
+
+.demo-note,
+.demo-badge,
+.upgrade-card,
+.project-github-callout {
+  border-radius: 16px;
+}
+
+.dashboard-chart-bars {
+  border: 1px solid rgb(255 255 255 / 86%);
+  border-radius: 9px 9px 4px 4px;
+  background: rgb(255 255 255 / 47%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 82%);
+}
+
+.dashboard-chart-success,
+.legend-success {
+  background: linear-gradient(180deg, #9b8df3, #6b5cde);
+}
+
+.dashboard-chart-active,
+.legend-active {
+  background: linear-gradient(180deg, #75d1c3, #34a894);
+}
+
+.status-pill,
+.deployment-status,
+.run-status-badge,
+.server-status {
+  border-radius: 999px;
+}
+
+.project-icon-button:hover:not(:disabled),
+.icon-button:hover {
+  border-color: rgb(255 255 255 / 86%);
+  background: rgb(255 255 255 / 67%);
+  box-shadow: inset 0 1px 0 #fff, 0 5px 14px rgb(70 82 125 / 7%);
+}
+
+.auth-error,
+.projects-alert,
+.admin-alert,
+.project-activity-error,
+.deployment-alert,
+.password-error {
+  border-radius: 13px;
+  background: rgb(255 243 242 / 78%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 93%);
+}
+
+.projects-success,
+.admin-notice,
+.password-success {
+  border-radius: 13px;
+  background: rgb(239 250 245 / 78%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 93%);
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    background: rgb(249 251 255 / 87%);
+  }
+
+  .topbar,
+  .projects-topbar,
+  .admin-topbar {
+    background: rgb(249 251 255 / 82%);
+  }
+
+  .auth-card {
+    padding: 32px 28px 27px;
+    border-radius: 24px;
+  }
+
+  .project-card {
+    min-height: 204px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
