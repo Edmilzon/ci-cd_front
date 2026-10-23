@@ -6,6 +6,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { beginGitHubConnection, createProject, getGitHubConnection, getProjects, type GitHubConnection, type Project } from "@/src/lib/project-api";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 
 function messageOf(error: unknown) {
   return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente.";
@@ -95,7 +96,7 @@ export default function ProjectsPage() {
     }
   }
 
-  return <main className="projects-shell">
+  return <WorkspaceShell><main className="projects-shell">
     <header className="projects-topbar">
       <Link className="projects-brand" href="/" aria-label="CDCI, volver al resumen"><span className="brand-symbol"><i /><i /><i /></span><strong>cdci<span>.</span></strong></Link>
       <nav aria-label="Ruta"><Link href="/">Resumen</Link><span>/</span><strong>Proyectos</strong></nav>
@@ -135,7 +136,7 @@ export default function ProjectsPage() {
         <div className="project-modal-footer"><button type="button" className="projects-secondary" onClick={() => setFormOpen(false)}>Cancelar</button><button className="projects-primary" disabled={busy || !name.trim()}>{busy ? "Creando…" : "Crear proyecto"}</button></div>
       </form>
     </div>}
-  </main>;
+  </main></WorkspaceShell>;
 }
 
 function ProjectCard({ project }: { project: Project }) {

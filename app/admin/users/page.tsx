@@ -6,6 +6,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { getRoles, getUsers, updateUserRoles, updateUserStatus, type AdminUser, type PageResponse, type Role } from "@/src/lib/admin-api";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 
 const roleNames: Record<string, string> = { ADMIN: "Administrador", MAINTAINER: "Mantenedor", DEVELOPER: "Desarrollador", VIEWER: "Lector" };
 
@@ -77,7 +78,7 @@ export default function AdminUsersPage() {
     }
   }
 
-  return <main className="admin-page">
+  return <WorkspaceShell><main className="admin-page">
     <header className="admin-topbar"><Link className="admin-back" href="/">← Volver al dashboard</Link><span>Administración de acceso</span><span className="admin-user-chip">{actor?.fullName}</span></header>
     <div className="admin-content">
       <div className="admin-heading"><div><p className="admin-eyebrow">CONTROL DE ACCESO</p><h1>Usuarios</h1><p>Consulta cuentas, cambia su estado y asigna roles. Cada cambio invalida las sesiones afectadas.</p></div><span className="admin-count"><strong>{result?.totalElements ?? "—"}</strong><small>cuentas</small></span></div>
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
       </section>
       <p className="admin-footnote">El rol Administrador no se puede eliminar del último administrador activo. Los roles de sistema no se modifican desde esta pantalla.</p>
     </div>
-  </main>;
+  </main></WorkspaceShell>;
 }
 
 function RolePicker({ account, availableRoles, busy, onSave }: { account: AdminUser; availableRoles: Role[]; busy: boolean; onSave: (roles: string[]) => void }) {

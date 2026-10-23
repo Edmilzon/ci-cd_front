@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ApiError } from "@/src/lib/api";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 import ProjectSecretsPanel from "./secrets-panel";
 import ProjectServersPanel from "./servers-panel";
 import ProjectDeploymentsPanel from "./deployments-panel";
@@ -140,9 +141,9 @@ export default function ProjectDetailPage() {
     finally { setBusy(false); }
   }
 
-  if (loading && !project) return <main className="projects-shell"><div className="projects-state"><span className="projects-spinner" /> Cargando proyecto…</div></main>;
+  if (loading && !project) return <WorkspaceShell><main className="projects-shell"><div className="projects-state"><span className="projects-spinner" /> Cargando proyecto…</div></main></WorkspaceShell>;
 
-  return <main className="projects-shell">
+  return <WorkspaceShell><main className="projects-shell">
     <header className="projects-topbar"><Link className="projects-brand" href="/" aria-label="CDCI, volver al resumen"><span className="brand-symbol"><i /><i /><i /></span><strong>cdci<span>.</span></strong></Link><nav aria-label="Ruta"><Link href="/projects">Proyectos</Link><span>/</span><strong>{project?.name ?? "Proyecto"}</strong></nav><div className="projects-account"><span>{user?.fullName}</span><button onClick={() => void signOut()}>Salir</button></div></header>
 
     <div className="projects-content project-detail-content">
@@ -196,7 +197,7 @@ export default function ProjectDetailPage() {
     {editOpen && project && <div className="project-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditOpen(false); }}><form className="project-modal" onSubmit={(event) => void saveProject(event)}><div className="project-modal-heading"><div><span className="projects-eyebrow">CONFIGURACIÓN</span><h2>Editar proyecto</h2></div><button type="button" className="project-close" onClick={() => setEditOpen(false)} aria-label="Cerrar">×</button></div><label>Nombre<input required maxLength={100} value={editName} onChange={(event) => setEditName(event.target.value)} /></label><label>Descripción <span>Opcional</span><textarea rows={4} maxLength={1000} value={editDescription} onChange={(event) => setEditDescription(event.target.value)} /></label>{error && <div className="project-form-error" role="alert">{error}</div>}<div className="project-modal-footer"><button type="button" className="projects-secondary" onClick={() => setEditOpen(false)}>Cancelar</button><button className="projects-primary" disabled={busy || !editName.trim()}>{busy ? "Guardando…" : "Guardar cambios"}</button></div></form></div>}
 
     {repoDialogOpen && project && <RepositoryPicker projectId={project.id} onClose={() => setRepoDialogOpen(false)} onAdded={async (repo) => { setNotice(`${repo.fullName} se agregó al proyecto.`); await load(); setRepoDialogOpen(false); }} />}
-  </main>;
+  </main></WorkspaceShell>;
 }
 
 function RepositoryPicker({ projectId, onClose, onAdded }: { projectId: string; onClose: () => void; onAdded: (repository: ProjectRepository) => Promise<void> }) {

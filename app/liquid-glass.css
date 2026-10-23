@@ -714,3 +714,580 @@ a,
     transition-duration: .01ms !important;
   }
 }
+
+/* Stronger glass treatment for the application chrome and section hierarchy. */
+.sidebar {
+  overflow: hidden;
+  border-right-color: rgb(255 255 255 / 88%);
+  background: linear-gradient(165deg, rgb(255 255 255 / 74%), rgb(246 248 255 / 58%) 48%, rgb(238 242 255 / 49%));
+  box-shadow: 1px 0 0 rgb(255 255 255 / 82%), 18px 0 58px rgb(75 83 131 / 8%);
+  backdrop-filter: blur(38px) saturate(185%);
+  -webkit-backdrop-filter: blur(38px) saturate(185%);
+}
+
+.sidebar::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(151 133 246 / 14%), transparent 38%),
+    linear-gradient(90deg, transparent 96%, rgb(255 255 255 / 74%));
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  height: 42px;
+  padding: 0 10px;
+  border-radius: 14px;
+  transition: background var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+
+.brand:hover {
+  background: rgb(255 255 255 / 58%);
+  transform: translateY(-1px);
+}
+
+.brand-symbol {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgb(255 255 255 / 67%);
+  border-radius: 10px;
+}
+
+.brand-tag {
+  border-radius: 999px;
+  letter-spacing: .08em;
+}
+
+.workspace-switcher {
+  margin: 26px 0 25px;
+  padding: 12px 11px;
+  border-color: rgb(255 255 255 / 92%);
+  background: linear-gradient(130deg, rgb(255 255 255 / 76%), rgb(236 238 255 / 51%));
+  box-shadow: inset 0 1px 0 #fff, 0 11px 28px rgb(68 72 130 / 8%);
+}
+
+.workspace-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+.workspace-copy strong,
+.user-copy strong {
+  color: #26334c;
+  font-size: 11px;
+}
+
+.workspace-copy small,
+.user-copy small {
+  color: #71809a;
+}
+
+.nav-label {
+  margin: 0 10px 9px;
+  color: #7f8aa4;
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+
+.main-nav {
+  gap: 6px;
+}
+
+.nav-item {
+  position: relative;
+  height: 42px;
+  gap: 12px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  color: #52607a;
+  font-size: 11px;
+}
+
+.nav-item > svg {
+  flex: 0 0 auto;
+  color: #7c88a2;
+  transition: color var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+
+.nav-item:hover > svg,
+.nav-item.active > svg {
+  color: #6255ce;
+  transform: scale(1.06);
+}
+
+.nav-item.active {
+  overflow: hidden;
+  border-color: rgb(255 255 255 / 94%);
+  background: linear-gradient(105deg, rgb(255 255 255 / 84%), rgb(232 230 255 / 67%) 62%, rgb(221 244 246 / 54%));
+  box-shadow: inset 0 1px 0 #fff, 0 7px 20px rgb(82 73 157 / 10%);
+  color: #5548c5;
+}
+
+.nav-item.active::before {
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  content: "";
+  background: linear-gradient(180deg, #9a87f4, #625bdc 55%, #53bfc8);
+  box-shadow: 0 0 14px rgb(105 88 221 / 42%);
+}
+
+.nav-item.active::after {
+  position: absolute;
+  top: -18px;
+  right: -15px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle, rgb(255 255 255 / 74%), transparent 70%);
+}
+
+.nav-count {
+  width: 24px;
+  height: 22px;
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 74%);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.projects-label {
+  margin-top: 24px;
+}
+
+.project-nav-link {
+  height: 38px;
+  border: 1px solid rgb(255 255 255 / 42%);
+}
+
+.project-nav-link.is-current {
+  border-color: rgb(255 255 255 / 92%);
+  background: linear-gradient(105deg, rgb(255 255 255 / 78%), rgb(228 232 255 / 62%));
+  box-shadow: inset 0 1px 0 #fff, 0 6px 16px rgb(77 80 145 / 8%);
+  color: #5148b8;
+}
+
+.workspace-main-panel {
+  min-width: 0;
+}
+
+.workspace-main-panel > .projects-shell,
+.workspace-main-panel > .admin-page {
+  min-width: 0;
+}
+
+.upgrade-card {
+  padding: 15px 13px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 80%), rgb(236 231 255 / 68%) 56%, rgb(225 245 246 / 60%));
+}
+
+.upgrade-spark {
+  border: 1px solid rgb(255 255 255 / 88%);
+  border-radius: 9px;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgb(93 76 185 / 10%);
+}
+
+.upgrade-card strong {
+  color: #34415c;
+  font-size: 11px;
+}
+
+.upgrade-card p {
+  color: #6b7891;
+  font-size: 10px;
+}
+
+.user-profile {
+  margin-top: 5px;
+  padding: 12px 5px 2px;
+  border-top-color: rgb(103 119 159 / 16%);
+}
+
+.user-avatar,
+.top-avatar {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(255 255 255 / 96%);
+  background: linear-gradient(145deg, #ffe8d5, #f3d6ed 58%, #dce8ff);
+  box-shadow: inset 0 1px 0 #fff, 0 5px 13px rgb(88 78 130 / 8%);
+  color: #755469;
+  font-size: 10px;
+}
+
+.topbar,
+.projects-topbar,
+.admin-topbar {
+  min-height: 68px;
+  border-bottom-color: rgb(255 255 255 / 82%);
+  background: linear-gradient(100deg, rgb(255 255 255 / 76%), rgb(247 249 255 / 61%) 60%, rgb(238 244 255 / 60%));
+  box-shadow: 0 9px 32px rgb(57 71 119 / 6%);
+  backdrop-filter: blur(32px) saturate(185%);
+  -webkit-backdrop-filter: blur(32px) saturate(185%);
+}
+
+.topbar::after,
+.projects-topbar::after,
+.admin-topbar::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, transparent 4%, rgb(142 126 239 / 30%), rgb(111 202 213 / 31%), transparent 96%);
+}
+
+.breadcrumbs {
+  gap: 11px;
+  color: #72809a;
+  font-size: 11px;
+}
+
+.breadcrumbs strong {
+  color: #34415b;
+  font-weight: 700;
+}
+
+.search-box {
+  width: 246px;
+  height: 38px;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 72%);
+}
+
+.icon-button {
+  border: 1px solid rgb(255 255 255 / 84%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 57%);
+  box-shadow: inset 0 1px 0 #fff, 0 5px 14px rgb(66 78 124 / 5%);
+}
+
+.content-wrap {
+  padding-top: 40px;
+}
+
+.page-heading {
+  margin-bottom: 27px;
+}
+
+.page-heading h1,
+.projects-heading h1,
+.project-title-copy h1,
+.admin-heading h1 {
+  font-size: 30px;
+  letter-spacing: -.055em;
+}
+
+.page-heading p,
+.projects-heading p,
+.project-title-copy p,
+.admin-heading > div > p:last-child {
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.eyebrow,
+.projects-eyebrow,
+.admin-eyebrow {
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+
+.stats-grid {
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  min-height: 120px;
+  padding: 17px 18px 15px;
+  border-radius: 21px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 76%), rgb(255 255 255 / 51%));
+}
+
+.stat-head {
+  color: #5e6b84;
+  font-size: 11px;
+}
+
+.stat-value {
+  margin-top: 8px;
+  color: #202d47;
+  font-size: 28px;
+}
+
+.stat-foot {
+  color: #75819a;
+  font-size: 10px;
+}
+
+.dashboard-grid {
+  gap: 17px;
+  margin-bottom: 17px;
+}
+
+.chart-panel,
+.health-panel,
+.recent-panel,
+.full-list-panel,
+.environments-panel,
+.timeline-panel,
+.activity-panel,
+.settings-panel,
+.integration-panel {
+  padding: 20px 21px 18px;
+}
+
+.panel-heading h2,
+.integration-panel h2 {
+  color: #25334d;
+  font-size: 14px;
+  letter-spacing: -.015em;
+}
+
+.panel-heading p {
+  color: #71809a;
+  font-size: 10px;
+}
+
+.pipeline-row,
+.dashboard-deployment-row,
+.activity-item {
+  border-color: rgb(100 116 157 / 13%);
+  background: transparent;
+}
+
+.pipeline-row:hover,
+.dashboard-deployment-row:hover,
+.activity-item:hover {
+  background: linear-gradient(90deg, rgb(255 255 255 / 62%), rgb(237 236 255 / 42%), rgb(224 246 247 / 35%));
+}
+
+.projects-topbar {
+  height: 72px;
+  padding-right: max(32px, calc((100vw - 1240px) / 2));
+  padding-left: max(32px, calc((100vw - 1240px) / 2));
+}
+
+.projects-brand {
+  padding: 6px 10px 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease;
+}
+
+.projects-brand:hover {
+  border-color: rgb(255 255 255 / 82%);
+  background: rgb(255 255 255 / 50%);
+}
+
+.projects-brand > strong {
+  color: #26334c;
+  font-size: 21px;
+}
+
+.projects-topbar nav {
+  padding: 9px 14px;
+  border: 1px solid rgb(255 255 255 / 76%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 43%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 92%);
+}
+
+.projects-topbar nav strong {
+  color: #34415b;
+}
+
+.projects-account {
+  color: #57647d;
+}
+
+.projects-account button {
+  padding: 8px 12px;
+  color: #4e5c76;
+}
+
+.projects-content {
+  padding-top: 43px;
+}
+
+.project-detail-heading {
+  padding: 18px 20px;
+  border: 1px solid rgb(255 255 255 / 68%);
+  border-radius: 22px;
+  background: linear-gradient(110deg, rgb(255 255 255 / 44%), rgb(255 255 255 / 19%) 62%, rgb(196 226 241 / 17%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 82%);
+}
+
+.project-title-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 19px;
+}
+
+.project-stats {
+  gap: 14px;
+}
+
+.project-stats article {
+  min-height: 78px;
+  padding: 15px 17px;
+  border-radius: 17px;
+}
+
+.project-stats span {
+  color: #6e7b95;
+  font-size: 10px;
+}
+
+.project-stats strong {
+  color: #2c3954;
+  font-size: 18px;
+}
+
+.project-section-card {
+  margin: 16px 0;
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 72%), rgb(255 255 255 / 48%));
+}
+
+.project-section-heading h2 {
+  color: #293750;
+  font-size: 14px;
+}
+
+.project-section-heading p {
+  color: #71809a;
+  font-size: 10px;
+}
+
+.server-form label,
+.project-modal > label {
+  color: #52617b;
+  font-size: 9px;
+}
+
+.server-copy strong,
+.project-activity-copy strong,
+.linked-repo-copy > a,
+.linked-repo-copy > strong,
+.deployment-title > strong {
+  font-size: 11px;
+}
+
+.admin-topbar {
+  height: 68px;
+}
+
+.admin-content {
+  padding-top: 42px;
+}
+
+.admin-panel {
+  padding: 22px;
+  border-radius: 21px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 75%), rgb(255 255 255 / 49%));
+}
+
+.admin-table th {
+  font-size: 9px;
+}
+
+.admin-table td {
+  color: #53617a;
+  font-size: 10px;
+}
+
+.admin-person strong,
+.audit-event-copy strong {
+  font-size: 11px;
+}
+
+.admin-pagination,
+.admin-footnote {
+  color: #6d7b94;
+  font-size: 10px;
+}
+
+@media (max-width: 820px) {
+  .sidebar {
+    background: linear-gradient(180deg, rgb(255 255 255 / 86%), rgb(243 246 255 / 76%));
+  }
+
+  .nav-item {
+    width: 48px;
+    height: 46px;
+    margin-inline: auto;
+    border-radius: 15px;
+  }
+
+  .nav-item.active::before {
+    inset: auto 9px 0;
+    width: auto;
+    height: 3px;
+    border-radius: 999px 999px 0 0;
+  }
+
+  .nav-item.active::after {
+    top: -12px;
+    right: -15px;
+  }
+
+  .content-wrap {
+    padding-top: 30px;
+  }
+}
+
+@media (max-width: 620px) {
+  .projects-topbar {
+    min-height: 60px;
+    height: 60px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .projects-topbar nav {
+    padding: 7px 9px;
+  }
+
+  .projects-content,
+  .admin-content {
+    padding-top: 25px;
+  }
+
+  .project-detail-heading {
+    padding: 14px 12px;
+    border-radius: 18px;
+  }
+
+  .project-section-card,
+  .admin-panel {
+    padding: 16px 13px;
+    border-radius: 18px;
+  }
+
+  .chart-panel,
+  .health-panel,
+  .recent-panel,
+  .full-list-panel,
+  .environments-panel,
+  .timeline-panel,
+  .activity-panel,
+  .settings-panel,
+  .integration-panel {
+    padding: 15px 12px;
+  }
+}

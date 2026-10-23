@@ -7,6 +7,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { addPipelineVersion, createPipeline, deletePipeline, getPipelineRunLogs, getPipelineRuns, getPipelineVersion, getPipelineVersions, getPipelines, getProject, getProjectRepositories, queuePipelineRun, validatePipeline, type Pipeline, type PipelineRun, type PipelineRunLog, type PipelineValidation, type PipelineVersion, type PipelineVersionDetail, type Project, type ProjectRepository } from "@/src/lib/project-api";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 
 function errorMessage(error: unknown) { return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente."; }
 function dateLabel(value: string) { return new Intl.DateTimeFormat("es-BO", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); }
@@ -229,7 +230,7 @@ export default function ProjectPipelinesPage() {
     finally { setRunsLoading(false); }
   }
 
-  return <main className="projects-shell">
+  return <WorkspaceShell><main className="projects-shell">
     <header className="projects-topbar"><Link className="projects-brand" href="/" aria-label="CDCI, volver al resumen"><span className="brand-symbol"><i /><i /><i /></span><strong>cdci<span>.</span></strong></Link><nav aria-label="Ruta"><Link href="/projects">Proyectos</Link><span>/</span><Link href={`/projects/${projectId}`}>{project?.name ?? "Proyecto"}</Link><span>/</span><strong>Pipelines</strong></nav><div className="projects-account"><span>{user?.fullName}</span><button onClick={() => void signOut()}>Salir</button></div></header>
 
     <div className="projects-content pipeline-page">
@@ -274,5 +275,5 @@ export default function ProjectPipelinesPage() {
           </div>}
       <footer className="projects-footer">CDCI · Definiciones YAML y control de versiones</footer>
     </div>
-  </main>;
+  </main></WorkspaceShell>;
 }

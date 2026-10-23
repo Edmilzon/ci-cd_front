@@ -6,6 +6,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { createRole, deleteRole, getPermissions, getRoles, updateRole, updateRolePermissions, type Permission, type Role } from "@/src/lib/admin-api";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 
 function displayError(error: unknown) {
   return error instanceof ApiError ? error.message : "No pudimos completar la solicitud. Revisa la conexión e inténtalo otra vez.";
@@ -119,7 +120,7 @@ export default function AdminRolesPage() {
     }, {});
   }, [permissions]);
 
-  return <main className="admin-page">
+  return <WorkspaceShell><main className="admin-page">
     <header className="admin-topbar"><Link className="admin-back" href="/">← Volver al dashboard</Link><span>Administración de acceso</span><span className="admin-user-chip">{user?.fullName}</span></header>
     <div className="admin-content">
       <div className="admin-heading"><div><p className="admin-eyebrow">CONTROL DE ACCESO</p><h1>Roles y permisos</h1><p>Define lo que cada rol puede hacer. El servidor vuelve a validar cada acción.</p></div><span className="admin-count"><strong>{roles.length}</strong><small>roles</small></span></div>
@@ -138,5 +139,5 @@ export default function AdminRolesPage() {
       <section className="admin-panel create-role-panel"><div><h2>Crear un rol personalizado</h2><p>Los roles nuevos comienzan sin permisos. Asigna solo el acceso necesario.</p></div><form className="create-role-form" onSubmit={addRole}><label><span>Código</span><input value={newCode} onChange={(event) => setNewCode(event.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, "_"))} placeholder="RELEASE_MANAGER" minLength={2} maxLength={48} pattern="[A-Z][A-Z0-9_]{1,47}" required disabled={busy}/></label><label><span>Nombre</span><input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Gestor de releases" minLength={2} maxLength={80} required disabled={busy}/></label><label><span>Descripción</span><input value={newDescription} onChange={(event) => setNewDescription(event.target.value)} placeholder="Responsabilidades de este rol" maxLength={240} required disabled={busy}/></label><button className="admin-primary-button" disabled={busy}>{busy ? "Guardando…" : "Crear rol"}</button></form></section>
       <p className="admin-footnote"><Link href="/admin/users">Administrar asignaciones de usuarios →</Link> <span>·</span> <Link href="/admin/audit">Ver registro de auditoría →</Link></p>
     </div>
-  </main>;
+  </main></WorkspaceShell>;
 }

@@ -6,6 +6,7 @@ import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError } from "@/src/lib/api";
 import { getAuditEvents, type AuditEvent, type PageResponse } from "@/src/lib/admin-api";
 import { deferEffect } from "@/src/lib/defer-effect";
+import { WorkspaceShell } from "@/src/ui/WorkspaceShell";
 
 const actionNames: Record<string, string> = {
   USER_ENABLED: "Cuenta habilitada",
@@ -34,7 +35,7 @@ export default function AdminAuditPage() {
 
   useEffect(() => deferEffect(() => { void load(); }), [load]);
 
-  return <main className="admin-page">
+  return <WorkspaceShell><main className="admin-page">
     <header className="admin-topbar"><Link className="admin-back" href="/">← Volver al dashboard</Link><span>Administración de acceso</span><span className="admin-user-chip">{user?.fullName}</span></header>
     <div className="admin-content">
       <div className="admin-heading"><div><p className="admin-eyebrow">TRAZABILIDAD</p><h1>Auditoría de acceso</h1><p>Historial de cambios de usuarios, roles y permisos.</p></div><span className="admin-count"><strong>{result?.totalElements ?? "—"}</strong><small>eventos</small></span></div>
@@ -45,5 +46,5 @@ export default function AdminAuditPage() {
       </section>
       <p className="admin-footnote"><Link href="/admin/users">Usuarios</Link> <span>·</span> <Link href="/admin/roles">Roles y permisos</Link></p>
     </div>
-  </main>;
+  </main></WorkspaceShell>;
 }
