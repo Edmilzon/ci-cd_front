@@ -43,6 +43,7 @@ export type ProjectServer = {
   host: string;
   port: number;
   username: string;
+  hostKeyFingerprint: string | null;
   lastStatus: ProjectServerStatus;
   lastConnectedAt: string | null;
   createdBy: string;
@@ -50,7 +51,7 @@ export type ProjectServer = {
   createdAt: string;
   updatedAt: string;
 };
-export type ProjectServerInput = { name: string; host: string; port: number; username: string; password: string };
+export type ProjectServerInput = { name: string; host: string; port: number; username: string; hostKeyFingerprint: string; password: string };
 export type ProjectServerUpdateInput = Omit<ProjectServerInput, "password"> & { password?: string };
 export type ProjectServerConnection = { status: "CONNECTED"; message: string; osInfo: string; latencyMs: number; server: ProjectServer };
 export type ProjectServerCommandResult = { command: string; output: string; errorOutput: string; exitStatus: number; durationMillis: number };

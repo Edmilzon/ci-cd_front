@@ -19,10 +19,11 @@ type ServerForm = {
   host: string;
   port: string;
   username: string;
+  hostKeyFingerprint: string;
   password: string;
 };
 
-const emptyForm: ServerForm = { name: "", host: "", port: "22", username: "root", password: "" };
+const emptyForm: ServerForm = { name: "", host: "", port: "22", username: "root", hostKeyFingerprint: "", password: "" };
 
 function errorMessage(error: unknown) {
   return error instanceof ApiError ? error.message : "No pudimos completar la operación. Inténtalo nuevamente.";
@@ -73,7 +74,7 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
 
   function beginEdit(server: ProjectServer) {
     setEditingId(server.id);
-    setForm({ name: server.name, host: server.host, port: String(server.port), username: server.username, password: "" });
+    setForm({ name: server.name, host: server.host, port: String(server.port), username: server.username, hostKeyFingerprint: server.hostKeyFingerprint ?? "", password: "" });
     setError("");
     setNotice("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -85,8 +86,13 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
     const name = form.name.trim();
     const host = form.host.trim();
     const username = form.username.trim();
+    const hostKeyFingerprint = form.hostKeyFingerprint.trim();
     if (!name || !host || !username || !Number.isInteger(port) || port < 1 || port > 65535) {
       setError("Completa el nombre, el host, el puerto y el usuario SSH.");
+      return;
+    }
+    if (!/^SHA256:[A-Za-z0-9+/]{43}$/.test(hostKeyFingerprint)) {
+      setError("Ingresa la huella SSH en formato SHA256:… y verifícala por un canal confiable.");
       return;
     }
     if (!editingId && !form.password) {
@@ -98,10 +104,11 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
       if (editingId) {
         const saved = await updateProjectServer(projectId, editingId, {
           name, host, port, username, ...(form.password ? { password: form.password } : {}),
+        hostKeyFingerprint,
         });
         setNotice(`Servidor ${saved.name} actualizado.`);
       } else {
-        const saved = await createProjectServer(projectId, { name, host, port, username, password: form.password });
+        const saved = await createProjectServer(projectId, { name, host, port, username, hostKeyFingerprint, password: form.password });
         setNotice(`Servidor ${saved.name} agregado. Ya puedes probar la conexión.`);
       }
       resetForm();
@@ -145,8 +152,8 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
         <span className="server-count">{servers.length} {servers.length === 1 ? "servidor" : "servidores"}</span>
       </div>
       <div className="server-security-note">
-        <strong>Acceso cifrado</strong>
-        <span>La contraseña se guarda cifrada y nunca vuelve a la interfaz. La conexión se hace desde el backend de CDCI; el servidor debe permitir SSH por contraseña. En la primera conexión se acepta la huella del host: verifica que la IP sea la correcta.</span>
+        <strong>Acceso cifrado y verificado</strong>
+        <span>La contraseña se guarda cifrada y nunca vuelve a la interfaz. Antes de conectar, CDCI exige que la huella SSH SHA-256 coincida. Verifícala con el administrador del host por un canal confiable; no uses una huella obtenida únicamente por esta conexión.</span>
       </div>
       {error && <div className="projects-alert server-alert" role="alert"><span>!</span>{error}</div>}
       {notice && <div className="projects-success server-alert" role="status">✓ {notice}</div>}
@@ -156,10 +163,11 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
         <label><span>Host o IP</span><input required maxLength={253} value={form.host} onChange={(event) => updateField("host", event.target.value)} placeholder="192.168.1.10 o mi-servidor.com" autoCapitalize="none" spellCheck={false} /></label>
         <label><span>Puerto</span><input required type="number" min={1} max={65535} value={form.port} onChange={(event) => updateField("port", event.target.value)} /></label>
         <label><span>Usuario SSH</span><input required maxLength={100} value={form.username} onChange={(event) => updateField("username", event.target.value)} placeholder="root" autoCapitalize="none" spellCheck={false} /></label>
+        <label><span>Huella de host SSH · SHA-256</span><input required maxLength={50} pattern="SHA256:[A-Za-z0-9+/]{43}" value={form.hostKeyFingerprint} onChange={(event) => updateField("hostKeyFingerprint", event.target.value)} placeholder="SHA256:…" autoCapitalize="none" spellCheck={false} /></label>
         <label><span>Contraseña SSH</span><input required={!editingId} minLength={editingId ? undefined : 1} maxLength={4096} type="password" autoComplete="new-password" value={form.password} onChange={(event) => updateField("password", event.target.value)} placeholder={editingId ? "Dejar vacía para conservar" : "Se guardará cifrada"} /></label>
         <button className="projects-primary" disabled={busy || !form.name.trim() || !form.host.trim() || !form.username.trim() || (!editingId && !form.password)}>{busy ? "Guardando…" : editingId ? "Guardar cambios" : "Agregar servidor"}</button>
         {editingId && <button type="button" className="projects-secondary server-cancel" onClick={resetForm} disabled={busy}>Cancelar edición</button>}
-        <small>{editingId ? "Deja la contraseña vacía para conservar la actual. Los cambios de conexión se aplican al probar o ejecutar." : "La contraseña se cifra en el backend y no se muestra después de guardarla."}</small>
+        <small>Obtén la huella en el servidor con <code>ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256</code> (o la clave activa) y confírmala fuera de CDCI. {editingId ? "Deja la contraseña vacía para conservar la actual." : "La contraseña se cifra y no se vuelve a mostrar."}</small>
       </form>
 
       {loading ? <div className="projects-state server-loading"><span className="projects-spinner" /> Cargando servidores…</div>
@@ -169,11 +177,12 @@ export default function ProjectServersPanel({ projectId }: { projectId: string }
             <strong>{server.name}</strong>
             <span className="server-endpoint">{server.username}@{server.host}:{server.port}</span>
             <small>Última conexión: {dateLabel(server.lastConnectedAt)}</small>
+            <small className="server-fingerprint">Huella SSH: {server.hostKeyFingerprint || "Pendiente; edita el servidor para fijarla"}</small>
           </div>
           <span className={`server-status status-${statusClass(server.lastStatus)}`}>{statusLabel(server.lastStatus)}</span>
           <div className="server-actions">
-            <button type="button" className="projects-secondary server-action" onClick={() => void test(server)} disabled={busy || testingId !== null}>{testingId === server.id ? "Probando…" : "Probar"}</button>
-            <button type="button" className="projects-secondary server-action" onClick={() => setConsoleServer(server)} disabled={busy}>Consola</button>
+            <button type="button" className="projects-secondary server-action" onClick={() => void test(server)} disabled={busy || testingId !== null || !server.hostKeyFingerprint}>{testingId === server.id ? "Probando…" : "Probar"}</button>
+            <button type="button" className="projects-secondary server-action" onClick={() => setConsoleServer(server)} disabled={busy || !server.hostKeyFingerprint}>Consola</button>
             <button type="button" className="projects-secondary server-action" onClick={() => beginEdit(server)} disabled={busy}>Editar</button>
             <button type="button" className="project-icon-button" aria-label={`Eliminar servidor ${server.name}`} title="Eliminar servidor" onClick={() => void remove(server)} disabled={busy}>×</button>
           </div>

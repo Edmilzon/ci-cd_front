@@ -226,8 +226,8 @@ test("project server calls match the backend SSH routes", async () => {
   });
 
   await projectApi.getProjectServers("project-7");
-  await projectApi.createProjectServer("project-7", { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", password: "ssh-secret" });
-  await projectApi.updateProjectServer("project-7", "server-1", { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy" });
+  await projectApi.createProjectServer("project-7", { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", hostKeyFingerprint: "SHA256:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0", password: "ssh-secret" });
+  await projectApi.updateProjectServer("project-7", "server-1", { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy", hostKeyFingerprint: "SHA256:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0" });
   await projectApi.testProjectServer("project-7", "server-1");
   await projectApi.executeProjectServerCommand("project-7", "server-1", "uname -a");
   await projectApi.deleteProjectServer("project-7", "server-1");
@@ -242,9 +242,9 @@ test("project server calls match the backend SSH routes", async () => {
   ]);
   assert.equal(calls[0].options.method, undefined);
   assert.equal(calls[1].options.method, "POST");
-  assert.deepEqual(JSON.parse(calls[1].options.body), { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", password: "ssh-secret" });
+  assert.deepEqual(JSON.parse(calls[1].options.body), { name: "Producción", host: "10.0.0.5", port: 22, username: "deploy", hostKeyFingerprint: "SHA256:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0", password: "ssh-secret" });
   assert.equal(calls[2].options.method, "PUT");
-  assert.deepEqual(JSON.parse(calls[2].options.body), { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy" });
+  assert.deepEqual(JSON.parse(calls[2].options.body), { name: "Producción", host: "10.0.0.6", port: 2222, username: "deploy", hostKeyFingerprint: "SHA256:ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0" });
   assert.equal(calls[3].options.method, "POST");
   assert.deepEqual(JSON.parse(calls[4].options.body), { command: "uname -a" });
   assert.equal(calls[5].options.method, "DELETE");
