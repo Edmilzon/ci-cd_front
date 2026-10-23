@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, getRegistrationStatus, registerAccount, requestEmailVerification } from "@/src/lib/api";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -79,6 +80,7 @@ export default function RegisterPage() {
   }
 
   return <main className="auth-page">
+    <ThemeSelector className="auth-theme-selector" />
     <section className="auth-card" aria-labelledby="register-title">
       <Link className="auth-brand" href="/" aria-label="CDCI, inicio"><span className="brand-symbol"><i /><i /><i /></span><span>cdci<span>.</span></span></Link>
       <p className="auth-eyebrow">EMPIEZA CON CDCI</p>

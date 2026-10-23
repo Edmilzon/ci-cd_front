@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/src/auth/AuthProvider";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 import { ChangePasswordForm } from "@/src/auth/ChangePasswordForm";
 import { MfaSettings } from "@/src/auth/MfaSettings";
 import { API_BASE_URL } from "@/src/lib/api";
@@ -213,6 +214,7 @@ export default function Home() {
       <div className="sidebar-bottom">
         <div className="upgrade-card"><span className="upgrade-spark">⌘</span><strong>{dashboard ? dashboard.projectCount + " proyectos visibles" : "Tus proyectos"}</strong><p>Conecta repositorios GitHub y revisa aquí sus ejecuciones.</p><Link href="/projects">Abrir proyectos <Icon name="arrow" size={14} /></Link></div>
         <button className={"nav-item settings-link " + (section === "Ajustes" ? "active" : "")} onClick={() => setSection("Ajustes")}><Icon name="settings" /><span>Ajustes</span></button>
+        <ThemeSelector className="sidebar-theme-selector" />
         <div className="user-profile"><span className="user-avatar">{avatar}</span><span className="user-copy"><strong>{user?.fullName ?? "Usuario"}</strong><small>{user?.roles.map((role) => role === "ADMIN" ? "Administrador" : role === "VIEWER" ? "Lector" : role).join(", ")}</small></span><button aria-label="Cerrar sesión" title="Cerrar sesión" onClick={() => void signOut().catch(() => showNotice("No pudimos cerrar la sesión. Inténtalo otra vez."))}>↗</button></div>
       </div>
     </aside>

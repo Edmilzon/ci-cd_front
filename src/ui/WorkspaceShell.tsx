@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/src/auth/AuthProvider";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 
 function WorkspaceIcon({ name }: { name: "home" | "projects" | "pipelines" | "users" | "roles" | "audit" }) {
   const common = {
@@ -91,6 +92,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
 
       <div className="sidebar-bottom">
         <div className="upgrade-card"><span className="upgrade-spark">⌘</span><strong>Tu espacio CDCI</strong><p>Gestiona proyectos, pipelines y servidores en un solo lugar.</p><Link href="/projects">Abrir proyectos <span aria-hidden="true">↗</span></Link></div>
+        <ThemeSelector className="sidebar-theme-selector" />
         <div className="user-profile"><span className="user-avatar">{avatar}</span><span className="user-copy"><strong>{user?.fullName ?? "Usuario"}</strong><small>{user?.roles.map(roleLabel).join(", ") || "CDCI"}</small></span><button aria-label="Cerrar sesión" title="Cerrar sesión" onClick={() => void signOut()}>↗</button></div>
       </div>
     </aside>

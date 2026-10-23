@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/src/auth/AuthProvider";
 import { ApiError, completeMfaLogin, confirmMfaSetup, login, startMfaSetup, type MfaSetup } from "@/src/lib/api";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function LoginPage() {
   }
 
   return <main className="auth-page">
+    <ThemeSelector className="auth-theme-selector" />
     <section className="auth-card" aria-labelledby="login-title">
       <Link className="auth-brand" href="/" aria-label="CDCI, inicio"><span className="brand-symbol"><i /><i /><i /></span><span>cdci<span>.</span></span></Link>
       <p className="auth-eyebrow">PLATAFORMA CI/CD</p>

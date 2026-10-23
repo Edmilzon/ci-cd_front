@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, getPasswordResetStatus, requestPasswordReset } from "@/src/lib/api";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -32,6 +33,7 @@ export default function ForgotPasswordPage() {
   }
 
   return <main className="auth-page">
+    <ThemeSelector className="auth-theme-selector" />
     <section className="auth-card" aria-labelledby="forgot-title">
       <Link className="auth-brand" href="/login" aria-label="CDCI, inicio de sesión"><span className="brand-symbol"><i /><i /><i /></span><span>cdci<span>.</span></span></Link>
       <p className="auth-eyebrow">RECUPERA TU ACCESO</p>

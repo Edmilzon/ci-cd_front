@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, resetPassword } from "@/src/lib/api";
+import { ThemeSelector } from "@/src/ui/ThemeSelector";
 
 export default function ResetPasswordForm({ token }: { token: string }) {
   const [password, setPassword] = useState("");
@@ -34,6 +35,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return <main className="auth-page">
+    <ThemeSelector className="auth-theme-selector" />
     <section className="auth-card" aria-labelledby="reset-title">
       <Link className="auth-brand" href="/login" aria-label="CDCI, inicio de sesión"><span className="brand-symbol"><i /><i /><i /></span><span>cdci<span>.</span></span></Link>
       <p className="auth-eyebrow">SEGURIDAD DE LA CUENTA</p>
